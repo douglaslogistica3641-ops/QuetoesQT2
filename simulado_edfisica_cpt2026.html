@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Simulado Educação Física — CP-T/2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:#0b1a2e; --navy2:#142240; --navy3:#1c3060;
+    --gold:#c8a84b; --gold2:#e8c870; --gold3:#f5d980;
+    --green:#2e7d52; --green2:#3da069;
+    --red:#b03020; --red2:#d44030;
+    --cream:#f2edd8; --warm:#e8e2cc;
+    --text:#1a1208; --muted:#6a5e40;
+    --border:rgba(200,168,75,0.3);
+    --card:#ffffff;
+    --bg:#f0ead4;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:'Source Serif 4',Georgia,serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    overflow-x:hidden;
+    padding-bottom:72px; /* space for bottom nav */
+  }
+
+  /* ─── HEADER ─── */
+  #hdr{
+    background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 60%,var(--navy3) 100%);
+    color:white;
+    padding:16px 16px 14px;
+    position:sticky;top:0;z-index:200;
+    box-shadow:0 2px 16px rgba(0,0,0,.35);
+  }
+  #hdr .htop{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  #hdr .logo{display:flex;align-items:center;gap:9px}
+  #hdr .logo-ic{
+    width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--gold),var(--gold2));
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.1rem;flex-shrink:0;
+    box-shadow:0 2px 8px rgba(200,168,75,.4);
+  }
+  #hdr h1{font-family:'Barlow Condensed',sans-serif;font-size:1.05rem;font-weight:800;line-height:1.1;color:var(--gold2)}
+  #hdr h1 small{display:block;font-size:.65rem;font-weight:400;color:#7a9ab8;font-family:'JetBrains Mono',monospace;letter-spacing:.06em;margin-top:1px}
+  .hsc{
+    background:rgba(200,168,75,.12);border:1px solid var(--border);
+    border-radius:8px;padding:5px 10px;text-align:right;flex-shrink:0;
+  }
+  .hsc-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;font-weight:700;color:var(--gold);line-height:1}
+  .hsc-lbl{font-size:.58rem;color:#5a7a9a;letter-spacing:.05em;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+
+  /* ─── PROGRESS BAR ─── */
+  .prog-wrap{margin-top:10px}
+  .prog-bar{height:4px;background:rgba(200,168,75,.15);border-radius:2px;overflow:hidden}
+  .prog-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold2));border-radius:2px;transition:width .4s ease;width:0%}
+  .prog-info{display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+  .prog-txt{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#5a7a9a}
+
+  /* ─── TAB NAVIGATION ─── */
+  #tab-nav{
+    position:fixed;bottom:0;left:0;right:0;z-index:300;
+    background:var(--navy);
+    border-top:2px solid var(--gold);
+    display:flex;
+    box-shadow:0 -4px 24px rgba(0,0,0,.4);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .tab-btn{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:9px 4px 7px;
+    cursor:pointer;border:none;background:transparent;
+    color:#5a7a9a;transition:color .2s;
+    -webkit-tap-highlight-color:transparent;
+    position:relative;
+  }
+  .tab-btn.active{color:var(--gold2)}
+  .tab-btn::before{
+    content:'';position:absolute;top:0;left:15%;right:15%;height:2px;
+    background:var(--gold);border-radius:0 0 3px 3px;
+    transform:scaleX(0);transition:transform .25s ease;
+  }
+  .tab-btn.active::before{transform:scaleX(1)}
+  .tab-ic{font-size:1.2rem;margin-bottom:2px}
+  .tab-lbl{font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+  .tab-badge{
+    position:absolute;top:6px;right:calc(50% - 20px);
+    background:var(--gold);color:var(--navy);
+    font-family:'JetBrains Mono',monospace;font-size:.5rem;font-weight:700;
+    padding:1px 5px;border-radius:8px;line-height:1.4;
+  }
+
+  /* ─── PANELS ─── */
+  .panel{display:none;padding:14px 12px 10px;animation:fadeup .3s ease}
+  .panel.active{display:block}
+  @keyframes fadeup{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* ─── PANEL HEADER ─── */
+  .ph{
+    background:linear-gradient(135deg,var(--navy2),var(--navy3));
+    border-radius:12px;padding:14px 16px;margin-bottom:14px;
+    border:1px solid var(--border);
+    position:relative;overflow:hidden;
+  }
+  .ph::after{
+    content:'';position:absolute;right:-10px;top:-10px;
+    width:80px;height:80px;border-radius:50%;
+    background:rgba(200,168,75,.07);
+  }
+  .ph-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--gold);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px}
+  .ph-title{font-family:'Barlow Condensed',sans-serif;font-size:1.35rem;font-weight:800;color:var(--gold2);line-height:1.1}
+  .ph-sub{font-size:.72rem;color:#7a9ab8;margin-top:3px;font-family:'JetBrains Mono',monospace}
+  .ph-chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .chip{
+    font-family:'JetBrains Mono',monospace;font-size:.58rem;
+    background:rgba(200,168,75,.12);border:1px solid var(--border);
+    color:var(--gold);padding:2px 7px;border-radius:4px;letter-spacing:.04em;
+  }
+
+  /* ─── SCORE BANNER ─── */
+  .score-banner{
+    background:var(--navy);border:2px solid var(--gold);
+    border-radius:10px;padding:12px 15px;margin-bottom:14px;
+    font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--gold2);
+    display:none;
+  }
+  .score-banner.show{display:block}
+  .score-banner strong{color:var(--gold3);font-size:1.1rem}
+
+  /* ─── QUESTION CARD ─── */
+  .qcard{
+    background:var(--card);
+    border:1.5px solid #ddd7c5;
+    border-radius:12px;
+    margin-bottom:12px;
+    overflow:hidden;
+    transition:border-color .25s,box-shadow .25s;
+    box-shadow:0 2px 8px rgba(0,0,0,.06);
+  }
+  .qcard.ok{border-color:var(--green);box-shadow:0 2px 12px rgba(46,125,82,.15)}
+  .qcard.ng{border-color:var(--red);box-shadow:0 2px 12px rgba(176,48,32,.12)}
+
+  .qhead{
+    padding:12px 14px 9px;
+    border-bottom:1px solid #ede7d5;
+    background:linear-gradient(to right,rgba(11,26,46,.03),transparent);
+  }
+  .qnum{
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--navy);color:var(--gold);
+    font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;
+    padding:2px 7px;border-radius:4px;margin-right:6px;
+    letter-spacing:.04em;vertical-align:middle;
+  }
+  .qtopic{
+    font-family:'JetBrains Mono',monospace;font-size:.58rem;
+    color:var(--muted);letter-spacing:.05em;text-transform:uppercase;
+    margin-bottom:5px;
+  }
+  .qtext{font-size:.9rem;font-weight:600;color:var(--navy);line-height:1.45}
+
+  .qopts{padding:10px 12px 12px;display:flex;flex-direction:column;gap:7px}
+  .qopt{
+    display:flex;align-items:flex-start;gap:9px;
+    padding:10px 12px;
+    border:1.5px solid #e0d8c5;border-radius:8px;
+    cursor:pointer;transition:all .18s;
+    background:var(--warm);
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+  }
+  .qopt:active{transform:scale(.98)}
+  .qopt:hover{border-color:var(--gold);background:rgba(200,168,75,.08)}
+  .qopt.hit{background:rgba(46,125,82,.1);border-color:var(--green);color:#1a4d2e}
+  .qopt.miss{background:rgba(176,48,32,.09);border-color:var(--red);color:#6a180c}
+  .opt-lbl{
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;
+    min-width:22px;height:22px;
+    background:var(--navy);color:var(--gold);
+    border-radius:4px;display:flex;align-items:center;justify-content:center;
+    flex-shrink:0;margin-top:1px;
+  }
+  .opt-txt{font-size:.84rem;line-height:1.35;color:var(--text)}
+  .qopt.hit .opt-lbl{background:var(--green);color:white}
+  .qopt.miss .opt-lbl{background:var(--red);color:white}
+
+  .qfeed{
+    display:none;
+    padding:9px 14px 11px;
+    border-top:1px solid #ede7d5;
+    font-size:.8rem;line-height:1.4;
+  }
+  .qfeed.show{display:block}
+  .qfeed.fb-ok{color:var(--green);background:rgba(46,125,82,.04)}
+  .qfeed.fb-ng{color:var(--red);background:rgba(176,48,32,.04)}
+
+  /* ─── ACTION BUTTONS ─── */
+  .act-row{display:flex;gap:9px;margin:4px 0 20px;flex-wrap:wrap}
+  .btn-gold{
+    flex:1;min-width:120px;
+    background:var(--navy);color:var(--gold);
+    border:2px solid var(--gold);
+    padding:11px 16px;border-radius:9px;
+    font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:600;
+    cursor:pointer;letter-spacing:.04em;
+    transition:all .18s;-webkit-tap-highlight-color:transparent;
+  }
+  .btn-gold:active{transform:scale(.97);background:var(--gold);color:var(--navy)}
+  .btn-ghost{
+    flex:1;min-width:80px;
+    background:transparent;color:var(--muted);
+    border:1px solid #ccc5b0;
+    padding:11px 14px;border-radius:9px;
+    font-family:'JetBrains Mono',monospace;font-size:.72rem;
+    cursor:pointer;transition:all .18s;-webkit-tap-highlight-color:transparent;
+  }
+  .btn-ghost:active{transform:scale(.97)}
+
+  /* ─── FILTER BAR ─── */
+  .filter-bar{
+    display:flex;overflow-x:auto;gap:7px;padding-bottom:4px;
+    margin-bottom:12px;scrollbar-width:none;
+  }
+  .filter-bar::-webkit-scrollbar{display:none}
+  .filter-chip{
+    flex-shrink:0;
+    font-family:'JetBrains Mono',monospace;font-size:.62rem;
+    border:1.5px solid #d8d0b8;border-radius:20px;
+    padding:5px 11px;cursor:pointer;
+    background:white;color:var(--muted);
+    transition:all .18s;white-space:nowrap;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .filter-chip.active{background:var(--navy);color:var(--gold);border-color:var(--gold)}
+
+  /* ─── SECTION DIVIDER ─── */
+  .sec-div{
+    display:flex;align-items:center;gap:9px;
+    margin:18px 0 10px;
+  }
+  .sec-div-line{flex:1;height:1px;background:var(--border)}
+  .sec-div-lbl{
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;
+    color:var(--navy2);letter-spacing:.06em;text-transform:uppercase;
+    background:var(--gold);padding:2px 10px;border-radius:4px;
+    white-space:nowrap;
+  }
+
+  /* ─── SCROLL TO TOP ─── */
+  #top-btn{
+    position:fixed;bottom:82px;right:14px;z-index:150;
+    width:38px;height:38px;border-radius:50%;
+    background:var(--navy);color:var(--gold);
+    border:2px solid var(--gold);
+    font-size:1.1rem;display:none;align-items:center;justify-content:center;
+    cursor:pointer;box-shadow:0 3px 14px rgba(0,0,0,.3);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #top-btn.show{display:flex}
+
+  @media(min-width:600px){
+    body{max-width:480px;margin:0 auto}
+    #tab-nav{max-width:480px;left:50%;transform:translateX(-50%)}
+    #top-btn{right:calc(50% - 226px)}
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="hdr">
+  <div class="htop">
+    <div class="logo">
+      <div class="logo-ic">🏋️</div>
+      <h1>Simulado Ed. Física
+        <small>CP-T/2026 · Questões Gabaritadas</small>
+      </h1>
+    </div>
+    <div class="hsc">
+      <div class="hsc-val" id="hdr-score">0/0</div>
+      <div class="hsc-lbl">acertos</div>
+    </div>
+  </div>
+  <div class="prog-wrap">
+    <div class="prog-bar"><div class="prog-fill" id="hdr-prog"></div></div>
+    <div class="prog-info">
+      <span class="prog-txt" id="hdr-prog-txt">0 respondidas</span>
+      <span class="prog-txt" id="hdr-pct">0%</span>
+    </div>
+  </div>
+</header>
+
+<!-- PANELS -->
+<div id="p1" class="panel active"></div>
+<div id="p2" class="panel"></div>
+<div id="p3" class="panel"></div>
+
+<!-- BOTTOM NAV -->
+<nav id="tab-nav">
+  <button class="tab-btn active" onclick="switchTab(1,this)" id="tb1">
+    <span class="tab-ic">🧬</span>
+    <span class="tab-lbl">Simulado 1</span>
+    <span class="tab-badge" id="bd1">70</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab(2,this)" id="tb2">
+    <span class="tab-ic">💪</span>
+    <span class="tab-lbl">Simulado 2</span>
+    <span class="tab-badge" id="bd2">70</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab(3,this)" id="tb3">
+    <span class="tab-ic">📊</span>
+    <span class="tab-lbl">Simulado 3</span>
+    <span class="tab-badge" id="bd3">70</span>
+  </button>
+</nav>
+
+<button id="top-btn" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+// ─── QUESTION DATA ───────────────────────────────────────────────────────────
+// Format: [text, [A,B,C,D], correct('A'|'B'|'C'|'D'), feedback, topic]
+
+const Q1 = [
+// ═══════════════════════════ SIMULADO 1 — Anatomia & Fisiologia ══════════════
+// ── ANATOMIA HUMANA (35 questões) ──
+["Qual é a unidade estrutural e funcional básica de todos os organismos vivos?",["Tecido","Órgão","Célula","Sistema"],"C","A célula é a menor unidade estrutural e funcional dos seres vivos, capaz de realizar todas as funções básicas da vida, como metabolismo, reprodução e resposta a estímulos.","Anatomia"],
+["O tecido epitelial que reveste a pele é denominado:",["Epitélio simples colunar","Epitélio estratificado pavimentoso queratinizado","Epitélio pseudoestratificado","Epitélio simples cúbico"],"B","A epiderme é composta por epitélio estratificado pavimentoso queratinizado, cuja queratina impermeabiliza e protege a superfície corporal.","Anatomia"],
+["O sistema esquelético adulto é formado por quantos ossos aproximadamente?",["126","206","306","406"],"B","O esqueleto adulto humano possui aproximadamente 206 ossos. Ao nascer temos cerca de 270-300, que se fundem ao longo do desenvolvimento.","Anatomia"],
+["A epífise e a diáfise são partes estruturais de:",["Músculo","Osso longo","Cartilagem articular","Tendão"],"B","Ossos longos possuem epífises (extremidades) e diáfise (corpo/haste), com metáfise na junção. A cavidade medular contém medula óssea.","Anatomia"],
+["O esqueleto axial é composto por:",["Ossos dos membros superiores e inferiores","Cinturas escapular e pélvica","Crânio, coluna vertebral, costelas e esterno","Apenas ossos dos membros"],"C","O esqueleto axial inclui crânio (22 ossos), coluna vertebral (26 ossos), costelas (24) e esterno (1), totalizando cerca de 80 ossos.","Anatomia"],
+["Qual tipo de articulação permite maior amplitude de movimento?",["Sínfise","Sindesmose","Diartrose (sinovial)","Sinartrose"],"C","As diartroses (articulações sinoviais) possuem cavidade sinovial com fluido lubrificante e são as mais móveis. Exemplos: joelho, ombro, quadril.","Anatomia"],
+["O tipo de músculo responsável pelo movimento voluntário do esqueleto é:",["Liso","Cardíaco","Estriado esquelético","Liso visceral"],"C","O músculo estriado esquelético é controlado voluntariamente pelo sistema nervoso somático e se insere nos ossos por tendões.","Anatomia"],
+["A menor unidade contrátil do músculo esquelético é:",["Miofibrilas","Sarcômero","Fibra muscular","Fascículo"],"B","O sarcômero é a unidade funcional da miofibrila, delimitado por linhas Z, contendo filamentos de actina e miosina responsáveis pela contração.","Anatomia"],
+["No sistema nervoso central, a estrutura responsável pela coordenação motora e equilíbrio é:",["Tálamo","Cerebelo","Hipocampo","Amígdala"],"B","O cerebelo coordena movimentos precisos, equilíbrio e tônus muscular, recebendo informações dos proprioceptores, olhos e ouvido interno.","Anatomia"],
+["A medula espinal está localizada em:",["Cavidade craniana","Canal vertebral (canal medular)","Cavidade torácica","Cavidade abdominal"],"B","A medula espinal se estende do bulbo ao cone medular (L1-L2), protegida pelas vértebras que formam o canal vertebral.","Anatomia"],
+["Qual das estruturas a seguir pertence ao sistema linfático?",["Fígado","Pulmão","Baço","Rim"],"C","O baço é o maior órgão linfático, responsável por filtrar o sangue, destruir hemácias velhas e produzir células imunes.","Anatomia"],
+["O coração humano é dividido em quantas câmaras?",["2","3","4","6"],"C","O coração possui 4 câmaras: átrio direito, ventrículo direito, átrio esquerdo e ventrículo esquerdo, separadas por septos e valvas.","Anatomia"],
+["A valva que separa o átrio esquerdo do ventrículo esquerdo é chamada de:",["Tricúspide","Pulmonar","Aórtica","Mitral (bicúspide)"],"D","A valva mitral (bicúspide) controla o fluxo do átrio esquerdo para o ventrículo esquerdo. A tricúspide está no lado direito.","Anatomia"],
+["O músculo inspiratório primário responsável por 70-80% da ventilação em repouso é:",["Intercostais externos","Escaleno","Diafragma","Esternocleidomastoideo"],"C","O diafragma é o principal músculo inspiratório; sua contração aumenta o volume torácico, reduzindo a pressão intratorácica e favorecendo a entrada de ar.","Anatomia"],
+["As trocas gasosas entre alvéolos e capilares ocorrem por:",["Transporte ativo","Difusão simples","Osmose","Filtração hidrostática"],"B","A difusão simples é o mecanismo pelo qual O₂ e CO₂ atravessam a membrana alvéolo-capilar, movendo-se do maior para o menor gradiente de pressão parcial.","Anatomia"],
+["O nefrônio é a unidade funcional de qual sistema?",["Circulatório","Respiratório","Urinário","Digestório"],"C","O nefrônio é a unidade funcional do rim, formado por corpúsculo renal (glomérulo + cápsula de Bowman) e túbulo renal. Cada rim possui ~1 milhão de nefrônios.","Anatomia"],
+["O tecido ósseo esponjoso (trabecular) é encontrado predominantemente:",["Na diáfise de ossos longos","Nas epífises e ossos planos","Apenas na clavícula","Exclusivamente no crânio"],"B","O osso trabecular está nas epífises dos ossos longos e no interior dos ossos planos, sendo mais leve e com função hematopoiética na medula vermelha.","Anatomia"],
+["Qual hormônio produzido pelo pâncreas reduz a glicemia?",["Glucagon","Cortisol","Insulina","Adrenalina"],"C","A insulina, produzida pelas células beta das ilhotas de Langerhans, facilita a entrada de glicose nas células, reduzindo a glicemia sanguínea.","Anatomia"],
+["A principal função do sistema linfático no contexto da atividade física é:",["Produzir hemoglobina","Conduzir impulsos nervosos","Drenar o excesso de líquido intersticial e transportar lipídios absorvidos","Secretar hormônios de crescimento"],"C","O sistema linfático remove proteínas e fluidos do interstício, além de transportar quilomícrons (lipídios) absorvidos no intestino via quilíferos.","Anatomia"],
+["O tendão é um tecido conjuntivo que conecta:",["Osso a osso","Músculo a músculo","Músculo a osso","Cartilagem a cartilagem"],"C","Tendões conectam músculos a ossos, transmitindo a força contrátil para produzir movimento. São ricos em colágeno tipo I, com alta resistência à tração.","Anatomia"],
+["Os ligamentos unem:",["Músculo a osso","Osso a osso","Nervo a músculo","Cartilagem a músculo"],"B","Ligamentos conectam osso a osso nas articulações, restringindo movimentos excessivos e estabilizando as estruturas articulares.","Anatomia"],
+["O sistema nervoso autônomo subdivide-se em:",["Somático e periférico","Simpático e parassimpático","Central e periférico","Aferente e eferente"],"B","O SNA controla funções involuntárias e se divide em simpático (luta/fuga, noradrenalina) e parassimpático (repouso/digestão, acetilcolina).","Anatomia"],
+["Qual plano anatômico divide o corpo em porções anterior e posterior?",["Sagital","Transversal","Frontal (coronal)","Diagonal"],"C","O plano frontal (coronal) divide o corpo em porções anterior (ventral) e posterior (dorsal). O sagital divide em esquerda e direita; o transversal em superior e inferior.","Anatomia"],
+["Os ossos do tarso, metatarso e falanges compõem:",["Mão","Pé","Joelho","Tornozelo apenas"],"B","O pé é composto pelo tarso (7 ossos: calcâneo, tálus e outros), metatarso (5 ossos) e falanges (14 ossos), totalizando 26 ossos.","Anatomia"],
+["A articulação do ombro (glenoumeral) é classificada como:",["Gínglimo","Condiloide","Enartrode (esferóide)","Trocóide"],"C","A articulação glenoumeral é uma enartrode, permitindo movimentos em todos os planos (flexão, extensão, abdução, adução, rotação e circundução).","Anatomia"],
+["Qual estrutura produz os espermatozoides?",["Próstata","Epidídimo","Testículo (túbulos seminíferos)","Vesícula seminal"],"C","Os espermatozoides são produzidos nos túbulos seminíferos dos testículos, amadurecendo no epidídimo antes da ejaculação.","Anatomia"],
+["O sistema digestório inicia a digestão dos carboidratos na:",["Faringe","Boca (cavidade oral)","Estômago","Intestino delgado"],"B","A amilase salivar (ptialina), produzida pelas glândulas salivares, inicia a digestão química do amido na boca, hidrolisando ligações alfa-1,4-glicosídicas.","Anatomia"],
+["Os eritrócitos (hemácias) transportam O₂ graças à proteína:",["Albumina","Fibrinogênio","Hemoglobina","Transferrina"],"C","A hemoglobina é a proteína do eritrócito que se liga ao O₂ nos pulmões (oxiemoglobina) e o libera nos tecidos, além de transportar parte do CO₂.","Anatomia"],
+["Qual osso da cintura escapular é popularmente chamado de omoplata?",["Clavícula","Úmero","Escápula","Rádio"],"C","A escápula (omoplata) é o osso triangular da cintura escapular localizado na região posterior do tórax, que articula com a clavícula e o úmero.","Anatomia"],
+["O fêmur se articula com a tíbia formando:",["Articulação coxofemoral","Articulação do joelho (tibiofemoral)","Articulação talocrural","Articulação sacroilíaca"],"B","A articulação do joelho (tibiofemoral + patelofemoral) é a maior do corpo. Possui meniscos, ligamentos cruzados e colaterais.","Anatomia"],
+["A cartilagem hialina reveste:",["Superfícies articulares dos ossos","Discos intervertebrais","Meniscos","Lábio articular do quadril"],"A","A cartilagem hialina recobre as superfícies articulares dos ossos nas diartroses, reduzindo o atrito e absorvendo impactos.","Anatomia"],
+["O encéfalo e a medula espinal são protegidos por três membranas denominadas:",["Fascias","Meninges (dura-máter, aracnoide e pia-máter)","Periósteo, endósteo e perineuro","Epimísio, perimísio e endomísio"],"B","As meninges são as três membranas protetoras do SNC: dura-máter (externa, resistente), aracnoide (intermediária) e pia-máter (aderida ao tecido nervoso).","Anatomia"],
+["A principal artéria que irriga o membro inferior é:",["Artéria braquial","Artéria femoral","Artéria subclávia","Artéria ilíaca interna"],"B","A artéria femoral é a principal artéria do membro inferior, originando-se da artéria ilíaca externa, irriga coxas e, por suas ramificações, perna e pé.","Anatomia"],
+["O hormônio do crescimento (GH) é secretado por:",["Hipotálamo","Adrenal","Hipófise anterior (adenohipófise)","Tireoide"],"C","O GH é produzido pelos somatotrofos da adenohipófise, estimulado pelo GHRH hipotalâmico. Promove crescimento ósseo, síntese proteica e lipólise.","Anatomia"],
+["O retículo sarcoplasmático nos músculos esqueléticos tem como função principal:",["Produzir ATP","Armazenar e liberar Ca²⁺ para desencadear a contração muscular","Sintetizar proteínas contráteis","Conduzir o potencial de ação até o sarcômero"],"B","O retículo sarcoplasmático armazena Ca²⁺ e o libera para o sarcoplasma quando o potencial de ação chega via túbulos T, iniciando o ciclo de contração.","Anatomia"],
+
+// ── FISIOLOGIA DO EXERCÍCIO (35 questões) ──
+["O VO₂máx representa:",["A frequência cardíaca máxima","O volume máximo de O₂ consumido por minuto por quilograma de peso","A pressão arterial no esforço máximo","O volume corrente máximo"],"B","O VO₂máx é o maior volume de O₂ que o organismo consegue captar, transportar e utilizar por minuto, sendo o padrão-ouro da aptidão cardiorrespiratória.","Fisiologia"],
+["Durante o exercício intenso, a via energética predominante a curto prazo é:",["Oxidativa aeróbia","Sistema ATP-PCr (fosfagênio)","Glicólise oxidativa lenta","Oxidação lipídica"],"B","O sistema ATP-PCr fornece energia imediata (0-10s) sem necessidade de O₂, hidrolisando ATP e ressíntetizando-o a partir da fosfocreatina (PCr).","Fisiologia"],
+["O limiar anaeróbico (limiar de lactato) representa o ponto em que:",["O VO₂ começa a cair","A produção de lactato excede a taxa de remoção, elevando sua concentração sanguínea","O coração atinge frequência máxima","O glicogênio muscular se esgota completamente"],"B","No limiar anaeróbio, a demanda energética supera a capacidade aeróbia; a glicólise anaeróbia se intensifica, gerando lactato mais rápido do que é removido.","Fisiologia"],
+["A frequência cardíaca de reserva (FCR) é calculada por:",["FCmáx - FC repouso","FC repouso + FC máximo","FCmáx × VO₂máx","FC esforço / FC repouso"],"A","FCR = FCmáx − FC repouso (Método de Karvonen). Usada para prescrever intensidade: FC treino = FC rep + % FCR × (FCmáx − FC rep).","Fisiologia"],
+["O débito cardíaco (DC) é o produto de:",["Pressão arterial × frequência cardíaca","Volume sistólico × frequência cardíaca","VO₂ × resistência vascular","Volume corrente × frequência respiratória"],"B","DC = VS × FC. Em repouso ~5 L/min; no exercício máximo pode ultrapassar 20-25 L/min em atletas, principalmente pelo aumento do volume sistólico.","Fisiologia"],
+["Durante o exercício aeróbio prolongado, o principal substrato energético utilizado é:",["Proteínas de cadeia ramificada","Ácidos graxos livres (lipídios)","Corpo cetônicos","Aminoácidos gluconeogênicos"],"B","No exercício de longa duração e intensidade moderada, a oxidação de ácidos graxos livres mobilizados do tecido adiposo torna-se predominante.","Fisiologia"],
+["O fenômeno chamado 'deriva cardiovascular' durante exercício prolongado é caracterizado por:",["Queda progressiva da FC com aumento do VS","Aumento progressivo da FC com queda do VS, mantendo DC relativamente constante","Redução do DC com aumento da PA","Hipertensão súbita após 30 minutos de exercício"],"B","A deriva cardiovascular ocorre pela desidratação e redistribuição do sangue para a pele; o VS cai e a FC sobe compensatoriamente.","Fisiologia"],
+["O efeito do treinamento aeróbio crônico sobre o coração inclui:",["Taquicardia de repouso e menor VS","Bradicardia de repouso e maior VS (coração de atleta)","Hipertensão arterial crônica","Redução da capilarização muscular"],"B","O treinamento aeróbio crônico produz hipertrofia excêntrica cardíaca (dilatação + espessamento), bradicardia de repouso e aumento do VS.","Fisiologia"],
+["A saturação de oxigênio (SpO₂) em repouso ao nível do mar em indivíduos saudáveis é de aproximadamente:",["70-75%","80-85%","88-92%","95-99%"],"D","A SpO₂ normal em repouso é 95-99%, refletindo a eficiência da hematose pulmonar. Valores <90% indicam hipóxia clinicamente significativa.","Fisiologia"],
+["O quociente respiratório (QR) durante oxidação exclusiva de carboidratos é:",["0,70","0,82","1,00","1,20"],"C","QR = VCO₂/VO₂. Para CHO: glicose (C₆H₁₂O₆) produz 6CO₂ e consome 6O₂ → QR = 1,0. Para lipídios: ~0,70; misto: ~0,85.","Fisiologia"],
+["Os sistemas tampão do sangue que regulam o pH durante o exercício incluem:",["Hemoglobina, bicarbonato e proteínas plasmáticas","Apenas albumina","Mioglobina e hemossiderina","Fibrinogênio e plaquetas"],"A","Os principais tampões sanguíneos são: bicarbonato (HCO₃⁻, principal), hemoglobina e proteínas plasmáticas. Atuam para manter o pH entre 7,35-7,45.","Fisiologia"],
+["A 'second wind' (segundo fôlego) durante a corrida é atribuída a:",["Queda do lactato sanguíneo abaixo do limiar","Adaptação do sistema nervoso e melhora do recrutamento de unidades motoras","Início do uso exclusivo de lipídios","Liberação de endorfinas que eliminam a dor"],"B","O 'segundo fôlego' ocorre quando o organismo se ajusta à intensidade do exercício: ajuste respiratório, recrutamento motor e redistribuição circulatória se estabilizam.","Fisiologia"],
+["A hipertrofia muscular induzida pelo treinamento resistido resulta principalmente de:",["Aumento do número de fibras musculares (hiperplasia)","Aumento do volume das fibras musculares existentes por acúmulo de proteínas contráteis","Maior vascularização sem alteração do diâmetro das fibras","Conversão de fibras tipo II para tipo I"],"B","A hipertrofia ocorre pelo aumento da síntese proteica (actina e miosina), ampliando o diâmetro das fibras. A hiperplasia, se existe em humanos, é mínima.","Fisiologia"],
+["As fibras musculares do tipo I (oxidativas lentas) são caracterizadas por:",["Alta velocidade de contração e fadiga rápida","Baixa densidade mitocondrial e alta dependência de glicólise","Alta capacidade oxidativa, muitas mitocôndrias e resistência à fadiga","Grandes depósitos de PCr e ATP"],"C","Fibras tipo I têm alto teor de mioglobina e mitocôndrias, são ideais para exercício aeróbio prolongado (endurance), de cor vermelha e resistentes à fadiga.","Fisiologia"],
+["O hormônio que mais se eleva durante o exercício de alta intensidade, contribuindo para a mobilização de substratos, é:",["Insulina","Glucagon","Cortisol","Catecolaminas (adrenalina e noradrenalina)"],"D","As catecolaminas são os principais hormônios da resposta aguda ao exercício intenso: aumentam FC, glicogenólise, lipólise e redistribuem o fluxo sanguíneo.","Fisiologia"],
+["O princípio FITT de prescrição de exercício contempla:",["Frequência, Intensidade, Tempo e Tipo","Force, Interval, Training e Time","Função, Intensidade, Técnica e Treino","Frequência, Isometria, Tempo e Técnica"],"A","FITT = Frequência (dias/semana), Intensidade (% FCmáx, % VO₂R, etc.), Tempo (duração) e Tipo (modalidade). É a base da prescrição pelo ACSM.","Fisiologia"],
+["A termorregulação durante o exercício em calor é realizada principalmente por:",["Tremores musculares","Vasoconstrição periférica e redução da sudorese","Vasodilatação cutânea e sudorese","Taquicardia compensatória sem redistribuição sanguínea"],"C","O calor produzido pelo músculo em exercício é dissipado principalmente pela vasodilatação cutânea (condução/convecção) e pela evaporação do suor.","Fisiologia"],
+["A 'fadiga central' no exercício prolongado está relacionada a:",["Depleção de PCr no músculo","Acúmulo de H⁺ nas fibras musculares","Alterações no sistema nervoso central, incluindo redução de dopamina e acúmulo de serotonina","Falha na transmissão neuromuscular periférica"],"C","A fadiga central envolve mecanismos encefálicos: a hipótese da serotonina propõe que seu acúmulo e a queda de dopamina reduzem a motivação e o drive motor.","Fisiologia"],
+["Em relação ao consumo de O₂ após o exercício (EPOC — Excess Post-exercise Oxygen Consumption):",["É sempre igual ao EPOC em repouso","É maior após exercício de alta intensidade e representa custo energético elevado no período de recuperação","Só ocorre após exercício aeróbio contínuo","É idêntico após exercícios de diferentes intensidades"],"B","O EPOC é maior após exercícios de alta intensidade (HIIT) e resistido. Engloba a reposição de O₂ muscular, remoção de lactato, reposição de PCr e efeitos hormonais.","Fisiologia"],
+["A pressão arterial sistólica durante exercício aeróbio progressivo tipicamente:",["Permanece constante","Cai progressivamente","Aumenta progressivamente com a intensidade","Oscila entre hipertensão e hipotensão"],"C","A PA sistólica sobe linearmente com a intensidade do exercício dinâmico (aumento do DC). A diastólica permanece relativamente estável ou cai levemente.","Fisiologia"],
+["O consumo máximo de oxigênio (VO₂máx) é limitado principalmente por:",["Capacidade respiratória pulmonar","Capacidade do coração de bombear sangue oxigenado (DC máximo)","Disponibilidade de glicogênio hepático","Temperatura corporal central"],"B","O principal limitante do VO₂máx é o débito cardíaco máximo (coração). O transporte de O₂ (Hb, eritrócitos) e a extração periférica também contribuem.","Fisiologia"],
+["A mioglobina nos músculos tem função análoga à hemoglobina no sangue, que é:",["Contrair o músculo","Armazenar Ca²⁺","Armazenar e transportar O₂ dentro da célula muscular","Conduzir impulsos elétricos"],"C","A mioglobina é uma hemeproteína muscular que armazena O₂ no músculo, liberando-o quando a pO₂ cai durante a contração intensa.","Fisiologia"],
+["O glicogênio muscular como fonte energética durante exercício de alta intensidade é metabolizado pela via:",["Oxidação beta lipídica","Glicólise anaeróbia e aeróbia (glicogenólise muscular)","Neoglicogênese","Ciclo de Cori apenas"],"B","O glicogênio muscular é mobilizado pela glicogenólise (fosforilase muscular), alimentando a glicólise anaeróbia (lactato) ou aeróbia conforme a intensidade.","Fisiologia"],
+["O princípio da sobrecarga progressiva no treinamento físico afirma que:",["O volume deve permanecer constante durante toda a periodização","Para ocorrer adaptação, o estresse imposto deve ser progressivamente aumentado além do nível habitual","Apenas intensidade importa, não volume ou frequência","Deve-se treinar no limite máximo desde o início"],"B","A sobrecarga progressiva exige que o estresse de treinamento supere gradualmente o habitual para gerar novas adaptações, evitando platô e overtraining.","Fisiologia"],
+["As respostas cardiovasculares imediatas ao exercício incluem:",["Redução da FC e vasodilatação periférica","Aumento de FC, VS e redistribuição do fluxo sanguíneo para músculos ativos","Bradicardia e aumento da resistência vascular periférica","Redução do DC e aumento da PA diastólica"],"B","No início do exercício: FC e VS aumentam (DC↑), vasoconstricção em órgãos não-exercitantes e vasodilatação nos músculos ativos.","Fisiologia"],
+["O efeito agudo do exercício sobre a glicemia em diabéticos tipo 2 tende a ser:",["Hiperglicemia aguda invariável","Redução da glicemia pela maior captação de glicose muscular independente de insulina","Sem efeito sobre a glicemia","Aumento de insulina e hipoglicemia severa em todos os casos"],"B","Durante o exercício, a captação de glicose pelo músculo aumenta por mecanismo insulino-independente (translocação de GLUT-4), reduzindo a glicemia.","Fisiologia"],
+["A ventilação pulmonar durante o exercício máximo pode aumentar de ~6 L/min (repouso) para até:",["30-40 L/min","50-80 L/min","100-200 L/min","200-300 L/min"],"C","Atletas de alto nível podem atingir 100-200 L/min de ventilação no esforço máximo. O aumento é principalmente pelo aumento do volume corrente e frequência respiratória.","Fisiologia"],
+["A diferença arteriovenosa de O₂ (a-vO₂diff) durante o exercício máximo, comparada ao repouso, está:",["Inalterada","Diminuída pela hiperemia","Aumentada pela maior extração de O₂ pelos músculos ativos","Completamente irrelevante para o VO₂máx"],"C","Em repouso, a a-vO₂diff é ~5 mL O₂/dL. No exercício máximo, pode chegar a 15-16 mL/dL, refletindo a maior extração muscular de O₂.","Fisiologia"],
+["O sinal primário que desencadeia a contração muscular é:",["A chegada do potencial de ação ao músculo via junção neuromuscular liberando acetilcolina","A elevação de PCr no sarcoplasma","A elevação de AMP na mitocôndria","A ativação do retículo endoplasmático rugoso"],"A","O PA chega ao motoneurônio → libera ACh na fenda sináptica → despolarização da membrana muscular → propagação pelo túbulo T → liberação de Ca²⁺ do RS → contração.","Fisiologia"],
+["A equação de Fick para o VO₂ é:",["VO₂ = FC × PA","VO₂ = DC × (CaO₂ − CvO₂)","VO₂ = VS × FR","VO₂ = VE × FIO₂"],"B","VO₂ = DC × (CaO₂ − CvO₂), onde DC é o débito cardíaco, CaO₂ = conteúdo arterial de O₂ e CvO₂ = conteúdo venoso. Central × Periférico.","Fisiologia"],
+["A temperatura muscular durante o exercício intenso pode atingir até:",["36°C","37,5°C","39-40°C","45°C"],"C","O músculo em exercício gera calor; a temperatura intramuscular pode atingir 39-40°C, o que aumenta a eficiência enzimática mas também o risco de desnaturação proteica.","Fisiologia"],
+["O exercício físico regular está associado a qual efeito na inflamação crônica?",["Aumento dos marcadores inflamatórios (PCR, IL-6 crônica)","Redução dos marcadores inflamatórios crônicos e melhora da função imune","Sem efeito nos biomarcadores inflamatórios","Supressão completa do sistema imune"],"B","O exercício regular reduz PCR, IL-6 e TNF-α em repouso, sendo anti-inflamatório crônico, ao contrário da IL-6 que sobe agudamente durante o esforço (miocina).","Fisiologia"],
+["O treinamento de resistência (endurance) promove a biogênese mitocondrial via ativação de:",["mTOR e AKT","PGC-1α (coativador 1α do PPAR-γ)","NF-κB","Miostatina"],"B","O PGC-1α é o principal regulador da biogênese mitocondrial, ativado por AMPK (baixo ATP) e Ca²⁺ calmodulina; aumenta a densidade mitocondrial com treinamento aeróbio.","Fisiologia"],
+["O conceito de 'reserva de VO₂' (VO₂R) é usado na prescrição de exercício e representa:",["O VO₂ em repouso multiplicado por 2","A diferença entre VO₂máx e VO₂ de repouso","O VO₂ médio de treinamento","O volume corrente máximo"],"B","VO₂R = VO₂máx − VO₂ repouso. Usado no método de Swain para prescrição: VO₂ treino = VO₂ rep + % VO₂R × (VO₂máx − VO₂ rep). Análogo ao método de Karvonen para FC.","Fisiologia"],
+["A fadiga muscular periférica durante exercício de alta intensidade está principalmente associada a:",["Depleção de glicogênio hepático","Redução do pH intramuscular (acidose) por acúmulo de H⁺ e Pi","Queda da temperatura corporal","Redução da pressão arterial"],"B","O acúmulo de H⁺ (acidose) e fosfato inorgânico (Pi) inibe a miosina ATPase e reduz a sensibilidade da troponina ao Ca²⁺, comprometendo a geração de força.","Fisiologia"],
+];
+
+const Q2 = [
+// ═══════════════════════════ SIMULADO 2 — ACSM · Primeiros Socorros · TF · Biomecânica ═══
+// ── DIRETRIZES DO ACSM (18 questões) ──
+["Segundo o ACSM, a recomendação mínima de atividade física aeróbia para adultos saudáveis é:",["75 min/sem de intensidade moderada ou 150 min/sem de alta intensidade","150 min/sem de intensidade moderada ou 75 min/sem de alta intensidade","30 min/sem de intensidade leve","60 min/sem de intensidade moderada"],"B","O ACSM recomenda ≥150 min/sem de AF moderada OU ≥75 min/sem de AF vigorosa, ou combinação equivalente, em sessões de ≥10 min.","ACSM"],
+["O PAR-Q (Physical Activity Readiness Questionnaire) é utilizado como:",["Teste de aptidão física máximo","Triagem pré-exercício para identificar contraindicações e necessidade de avaliação médica","Protocolo de teste de VO₂máx","Questionário de composição corporal"],"B","O PAR-Q é ferramenta de triagem de baixa complexidade para detectar riscos antes da prática de exercícios, direcionando para avaliação médica quando necessário.","ACSM"],
+["Na estratificação de risco cardiovascular pelo ACSM, um homem de 55 anos com hipertensão controlada e sedentarismo é classificado como:",["Risco baixo","Risco moderado","Risco alto","Muito alto risco"],"B","Ter ≥2 fatores de risco cardiovascular (idade ≥45 anos em homem, hipertensão, sedentarismo) coloca o indivíduo em risco moderado segundo o ACSM.","ACSM"],
+["O teste de caminhada de 6 minutos (TC6) avalia principalmente:",["Força muscular máxima","Capacidade funcional aeróbia e tolerância ao esforço","Flexibilidade de membros inferiores","Composição corporal"],"B","O TC6 é um teste funcional submáximo que avalia a capacidade cardiorrespiratória funcional, amplamente usado em populações clínicas e idosos.","ACSM"],
+["Para o ACSM, a intensidade do exercício aeróbio moderado corresponde a:",["20-39% da FCR ou VO₂R","40-59% da FCR ou VO₂R","60-84% da FCR ou VO₂R","≥85% da FCR ou VO₂R"],"B","Segundo o ACSM: leve = 30-39% FCR; moderado = 40-59% FCR; vigoroso = 60-89% FCR; muito vigoroso = ≥90% FCR.","ACSM"],
+["A escala de Borg (RPE) de 6-20 pontos é usada para:",["Medir VO₂máx em laboratório","Avaliar a percepção subjetiva de esforço durante o exercício","Calcular o índice de massa corporal","Estratificar risco cardiovascular"],"B","A escala de Borg (6-20) quantifica a percepção de esforço: 6 = sem esforço; 20 = esforço máximo. Esforço moderado ≈ 11-13; vigoroso ≈ 14-17.","ACSM"],
+["A prescrição de exercício para hipertensos segundo o ACSM deve priorizar:",["Exercício isométrico de alta intensidade","Exercício aeróbio de intensidade moderada, resistido de baixa a moderada intensidade e redução do sedentarismo","Apenas exercícios de alongamento","Exercício intervalado de alta intensidade exclusivamente"],"B","Para hipertensos: aeróbio moderado (40-59% FCR) ≥5x/sem; resistido de moderada intensidade; evitar manobra de Valsalva; monitorar PA.","ACSM"],
+["Para diabéticos tipo 2, o ACSM recomenda não ficar mais de quantos dias consecutivos sem exercício aeróbio?",["1 dia","2 dias","3 dias","7 dias"],"B","O ACSM recomenda exercício aeróbio ≥3x/sem para DM2, com não mais de 2 dias consecutivos sem exercício, para manter o efeito na sensibilidade à insulina.","ACSM"],
+["O teste de esforço máximo com eletrocardiograma (teste ergométrico) está classicamente indicado para:",["Todo indivíduo antes de iniciar exercício leve","Avaliação diagnóstica e prognóstica de doenças cardiovasculares, especialmente coronariopatias","Apenas atletas profissionais","Avaliação de composição corporal"],"B","O teste ergométrico máximo avalia resposta cardiovascular ao esforço, detecta isquemia miocárdica, arritmias induzidas e tem valor prognóstico.","ACSM"],
+["Segundo o ACSM, a recomendação de exercício resistido para adultos saudáveis inclui:",["1 série de 5 repetições, 1 vez por semana","2-4 séries de 8-12 repetições, 2-3 vezes por semana para cada grupo muscular","10 séries de 1 repetição máxima, diariamente","Apenas exercícios com peso corporal"],"B","O ACSM recomenda: 2-4 séries, 8-12 RM, 2-3x/sem por grupo muscular, com 48-72h de recuperação entre sessões para o mesmo grupo.","ACSM"],
+["A carga de treinamento para melhora da força muscular segundo o ACSM deve ser de:",["20-30% de 1RM","40-50% de 1RM","60-70% de 1RM","≥70% de 1RM para novatos; ≥80% para avançados"],"D","Para força máxima: novatos ≥60% 1RM; intermediários ≥70%; avançados ≥80%. Para potência: 30-60% 1RM em velocidade máxima.","ACSM"],
+["O 'talk test' (teste da fala) correlaciona-se com qual intensidade de exercício?",["Apenas exercício máximo","Limiar ventilatório 1 (LV1) — intensidade em que a conversa começa a ser difícil","Frequência cardíaca de repouso","Exercício de muito baixa intensidade"],"B","O talk test é uma ferramenta prática: intensidade abaixo do LV1 permite falar confortavelmente; acima torna a conversa difícil ou impossível.","ACSM"],
+["A composição corporal pode ser avaliada pelo método de dobras cutâneas (skinfolds). A fórmula mais comum converte as somas das dobras em:",["VO₂máx estimado","Densidade corporal e depois percentual de gordura","Índice de massa muscular absoluto","Pressão arterial de esforço"],"B","As equações de Durnin & Womersley ou Jackson & Pollock estimam a densidade corporal a partir das dobras; depois usa-se Siri ou Brozek para %G.","ACSM"],
+["Em altitude elevada (>2500m), a principal limitação ao desempenho aeróbio é:",["Redução da temperatura muscular","Queda da pressão parcial de O₂ (hipóxia hipobárica), reduzindo SpO₂ e VO₂máx","Aumento excessivo da FC","Redução da glicemia"],"B","A hipóxia de altitude reduz a PO₂ alveolar, a saturação de Hb e o CaO₂, diminuindo o VO₂máx em ~1% por 100m acima de 1500m.","ACSM"],
+["Para gestantes sem contraindicações, o ACSM recomenda:",["Evitar qualquer atividade física","Atividade aeróbia de intensidade moderada ≥150 min/sem + exercícios de fortalecimento","Apenas exercícios de alta intensidade","Repouso absoluto no 1º trimestre"],"B","O ACSM apoia exercício moderado durante gestação sem complicações: benefícios incluem controle de peso, redução de diabetes gestacional e melhora do humor.","ACSM"],
+["O índice de massa corporal (IMC) é calculado por:",["Massa / Altura","Massa(kg) / Altura²(m)","Massa × Altura²","Circunferência abdominal / altura"],"B","IMC = peso(kg) / estatura²(m). Valores: <18,5 = baixo peso; 18,5-24,9 = normal; 25-29,9 = sobrepeso; ≥30 = obesidade.","ACSM"],
+["A hipotensão pós-exercício (HPE) é um efeito benéfico do exercício aeróbio que consiste em:",["Redução da FC após o esforço","Queda transitória da PA abaixo dos valores pré-exercício, podendo durar horas","Aumento permanente da PA diastólica","Arritmia transitória após esforço"],"B","A HPE pode durar 4-12h após exercício aeróbio; tem efeito anti-hipertensivo agudo relevante, especialmente em hipertensos.","ACSM"],
+["Segundo o ACSM, qual é o critério para interromper imediatamente um teste de esforço?",["FC acima de 120 bpm","Queda da PA sistólica >10 mmHg com aumento da carga, acompanhada de sinais de isquemia","Dispneia leve e transiente","Sudorese normal intensa"],"B","A queda de PAS >10 mmHg com carga crescente + sinais de isquemia é critério absoluto de parada. Outros: angina severa, ataxia, cianose, solicitação do paciente.","ACSM"],
+
+// ── PRIMEIROS SOCORROS (18 questões) ──
+["A Sequência de Avaliação Primária (Primary Assessment) no esporte segue a ordem:",["D-R-A-B-C-D (Danger-Response-Airway-Breathing-Circulation-Defibrillation)","Avaliação postural, força e flexibilidade","Apenas pulso e respiração","Glicemia, temperatura e PA"],"A","O protocolo de emergência começa por: Danger (segurança), Response (nível de consciência), Airway (via aérea), Breathing (respiração), Circulation (circulação), Defibrillation.","Primeiros Socorros"],
+["Na suspeita de lesão cervical em atleta caído, o primeiro socorrista deve:",["Movimentar o atleta imediatamente para área segura","Imobilizar a coluna cervical manualmente e aguardar suporte especializado","Aplicar compressas geladas na nuca","Sentar o atleta e avaliar força muscular"],"B","A suspeita de lesão cervical exige imobilização em linha neutra até exclusão por profissional qualificado — mover o paciente sem imobilização pode causar lesão medular.","Primeiros Socorros"],
+["O Protocolo PRICE para lesões musculoesqueléticas agudas inclui:",["Proteção, Repouso, Gelo, Compressão, Elevação","Pressão, Reabilitação, Injeção, Cirurgia, Exercício","Proteção, Resistência, Inflamação, Compressão, Estimulação","Prevenção, Reforço, Isometria, Correção, Exercício"],"A","PRICE: Protection (proteção), Rest (repouso), Ice (gelo/crioterapia), Compression (compressão), Elevation (elevação). Aplicado nas primeiras 24-48h após lesão aguda.","Primeiros Socorros"],
+["A Ressuscitação Cardiopulmonar (RCP) em adultos — conforme diretrizes — deve incluir compressões torácicas na frequência de:",["40-60/min","80-100/min","100-120/min","140-160/min"],"C","As diretrizes atuais (AHA, 2020) recomendam 100-120 compressões/min, com profundidade de 5-6 cm, permitindo o retorno completo do tórax.","Primeiros Socorros"],
+["O golpe de calor (heat stroke) difere da exaustão pelo calor principalmente por:",["Temperatura corporal abaixo de 37°C","Temperatura central >40°C com disfunção do SNC (confusão, ataxia, colapso)","Cãibras musculares severas e normotermia","Apenas hipotensão sem alteração neurológica"],"B","Golpe de calor: TC >40°C + disfunção do SNC. Emergência grave — esfriar imediatamente (imersão em água gelada é mais eficaz). Exaustão: TC <40°C, sem disfunção neurológica.","Primeiros Socorros"],
+["O tratamento imediato de uma entorse aguda de tornozelo inclui:",["Calor local e mobilização imediata","Crioterapia, compressão elástica, elevação e imobilização relativa (PRICE)","Massagem vigorosa no local","Corticoterapia oral imediata"],"B","O protocolo PRICE nas primeiras 48h reduz edema, dor e inflamação. O gelo deve ser aplicado por 15-20 min a cada 1-2h.","Primeiros Socorros"],
+["Um atleta está apresentando convulsões durante a competição. A conduta correta é:",["Imobilizar o atleta com força e introduzir objeto na boca","Proteger o atleta de traumas, afastar pessoas, não introduzir nada na boca e acionar SAMU","Aplicar água fria no rosto e tentar acordá-lo","Administrar açúcar via oral imediatamente"],"B","Durante convulsão: não imobilizar, não introduzir objetos na boca (risco de aspiração), proteger a cabeça, afastar pessoas e acionar emergência médica.","Primeiros Socorros"],
+["A cãibra muscular durante o exercício está mais associada a:",["Hipoglicemia grave","Fadiga muscular local, desidratação e desequilíbrio eletrolítico (sódio, magnésio)","Fratura por estresse","Lesão ligamentar iminente"],"B","Cãibras são contrações involuntárias dolorosas associadas à fadiga muscular, desidratação e perda eletrolítica (Na⁺, Mg²⁺). Tratamento: alongamento passivo, hidratação e reposição eletrolítica.","Primeiros Socorros"],
+["O sinal de Tinel em lesões de nervos periféricos consiste em:",["Dor à palpação do tendão de Aquiles","Sensação de formigamento ao percutir sobre o trajeto do nervo lesado","Crepitação articular durante a flexão","Instabilidade articular ao teste de gaveta"],"B","O sinal de Tinel é positivo quando a percussão sobre o nervo lesado ou comprimido provoca parestesia/formigamento no território do nervo — indica neuropraxia ou axonotmese.","Primeiros Socorros"],
+["Uma fratura exposta no campo esportivo deve ser tratada com:",["Reposição manual do osso e enfaixamento compressivo","Cobertura estéril da ferida, imobilização sem reduzir, e transporte para emergência","Irrigação com água da torneira e curativo oclusivo","Calor local e mobilização suave"],"B","Fratura exposta: não manipular, cobrir com pano limpo/estéril, imobilizar acima e abaixo da fratura sem tentar reposicionar e acionar emergência médica urgente.","Primeiros Socorros"],
+["A hipoglicemia durante o exercício em diabético insulinodependente manifesta-se com:",["Hipertermia e confusão mental","Tremores, sudorese fria, palidez, tontura e possível perda de consciência","Hipertensão súbita e dor torácica","Crise convulsiva exclusivamente"],"B","Hipoglicemia: tremores, sudorese fria, palidez, tontura, fraqueza, confusão. Se consciente: oferecer 15g de CHO rápido. Se inconsciente: acionar emergência, não dar nada oral.","Primeiros Socorros"],
+["Em relação às lesões na pele (abrasões esportivas), o procedimento correto inclui:",["Deixar secar ao ar sem limpeza","Limpar com solução salina ou água e sabão, remover debris e cobrir com curativo adequado","Aplicar álcool 70% diretamente na ferida e fechar hermeticamente","Cauterizar imediatamente"],"B","Abrasões: limpeza com solução salina ou água limpa, remoção de debris (pinça esterilizada), curativo úmido. Álcool puro é citotóxico e atrasa a cicatrização.","Primeiros Socorros"],
+["A lesão muscular grau III representa:",["Microrupturas das fibras sem perda de força","Ruptura parcial com dor moderada e hematoma","Ruptura total do músculo com perda funcional completa e hematoma extenso","Contusão superficial sem sangramento interno"],"C","Grau I: microrupturas, dor leve. Grau II: ruptura parcial, dor moderada, hematoma, perda parcial de função. Grau III: ruptura total, grave perda funcional.","Primeiros Socorros"],
+["O sinal clínico de síndrome compartimental aguda que mais preocupa é:",["Equimose leve e dor discreta","Dor desproporcional à lesão, tensão do compartimento, déficit sensorial e dor à extensão passiva","Edema mínimo pós-exercício","Espasmo muscular sem edema"],"B","Os 6 P's da síndrome compartimental: Pain (dor desproporcional), Pressure (tensão), Paresthesia, Pallor, Paralysis, Pulselessness. Emergência cirúrgica — fasciotomia.","Primeiros Socorros"],
+["Na remoção de atleta com suspeita de lesão medular, o método correto é:",["Remoção imediata sem qualquer apoio","Técnica log roll (rolamento em bloco) com imobilização da coluna, por equipe treinada","Sentar o atleta e transportar em cadeira de rodas","Transportar em maca comum sem imobilização específica"],"B","O log roll mantém o eixo espinhal neutro durante a remoção. Requer mínimo 3-4 pessoas: uma controla a cabeça/pescoço, demais o tronco e MMII.","Primeiros Socorros"],
+["A desfibrilação com DEA (Desfibrilador Externo Automático) deve ser iniciada:",["Apenas por médicos","O mais rápido possível (idealmente em <3-5 min do colapso), por qualquer pessoa treinada","Somente após 10 min de RCP contínua","Apenas em hospitais com UTI disponível"],"B","O DEA pode ser usado por leigos treinados. Cada minuto sem desfibrilação reduz a sobrevida em ~10%. Idealmente: RCP imediata + DEA em <5 min.","Primeiros Socorros"],
+["O protocolo SAMPLE para avaliação de emergência recolhe informações sobre:",["Sinais vitais, Antropometria, Medicamentos, Perda de peso, Lesões anteriores, Esportes","Sinais/sintomas, Alergias, Medicamentos, Passado médico, Última refeição, Eventos que levaram à situação","Saturação, Avaliação, Monitoramento, Pressão, Laboratório, Exame","Apenas consciência e respiração"],"B","SAMPLE: Signs/Symptoms, Allergies, Medications, Pertinent medical history, Last oral intake, Events leading up to the incident. Base da anamnese de emergência.","Primeiros Socorros"],
+["O tempo ideal de aplicação de gelo (crioterapia) em lesão aguda por sessão é:",["2-5 minutos","5-10 minutos","15-20 minutos","30-40 minutos"],"C","15-20 minutos é o tempo eficaz para reduzir temperatura tecidual sem causar queimadura por frio. Repetir a cada 1-2h nas primeiras 48h.","Primeiros Socorros"],
+
+// ── TREINAMENTO DE FORÇA (18 questões) ──
+["O princípio da especificidade no treinamento de força afirma que:",["Qualquer exercício produz adaptações idênticas","As adaptações ocorrem especificamente aos sistemas, padrões de movimento e tipos de contração utilizados no treino","O treinamento deve ser generalizado para resultados máximos","A força nunca se transfere entre diferentes exercícios"],"B","Especificidade (SAID): Specific Adaptation to Imposed Demands. Exercícios devem ser específicos ao objetivo: força máxima, potência, resistência de força.","Treinamento de Força"],
+["O destreinamento muscular após cessação do exercício resistido provoca, nas primeiras semanas:",["Rápida perda de hipertrofia com preservação da força neural","Perda de força primeiramente por fatores neurais, com hipertrofia preservada por mais tempo","Aumento temporário da força","Nenhuma alteração em 3 semanas"],"B","Nos primeiros 2-3 sem sem treinar: perda de força principalmente por fatores neurais (menor recrutamento/sincronização). A massa muscular demora mais para regredir.","Treinamento de Força"],
+["A periodização do treinamento de força divide o programa em:",["Séries, repetições e intervalos apenas","Microciclos (semanas), mesociclos (meses) e macrociclos (ano/temporada)","Apenas fases de volume e intensidade sem estrutura temporal","Blocos de 24h independentes"],"B","A periodização estrutura o treino em microciclos (5-10 dias), mesociclos (3-6 semanas) e macrociclo (3-12 meses), manipulando volume e intensidade para otimizar adaptações.","Treinamento de Força"],
+["A relação inversa entre repetições e carga (% 1RM) na musculação indica:",["Alta carga → mais repetições","Baixa carga → menos repetições","Alta carga (>85% 1RM) → poucas repetições (1-5); baixa carga (<65% 1RM) → muitas repetições (15+)","A carga não interfere nas repetições possíveis"],"C","1-5 RM ≈ >85%1RM (força máxima); 6-12 RM ≈ 67-85% (hipertrofia); 15+ RM ≈ <67% (resistência muscular localizada).","Treinamento de Força"],
+["O método de treinamento 'drop set' consiste em:",["Diminuir a amplitude de movimento em cada série","Realizar a série até a falha e imediatamente reduzir a carga para continuar mais repetições sem pausa","Alternar exercícios agonistas e antagonistas","Aumentar progressivamente a carga a cada série"],"B","Drop set: carga até a falha → reduz imediatamente a carga (~20-25%) → continua sem pausa. Gera alto volume metabólico e stress de hipertrofia.","Treinamento de Força"],
+["O intervalo de descanso ideal para objetivos de força máxima entre séries é:",["15-30 segundos","1-2 minutos","3-5 minutos","7-10 minutos"],"C","Para força máxima: 3-5 min de descanso permitem ressíntese de PCr e recuperação do SNC para manter alta intensidade. Para hipertrofia: 60-90s; para resistência: <60s.","Treinamento de Força"],
+["Mulheres que realizam treinamento resistido comparadas a homens tendem a apresentar:",["Mesmos níveis de hipertrofia absoluta","Menor hipertrofia absoluta (menos testosterona) mas ganhos proporcionais de força muscular similares","Mais hipertrofia pela maior concentração de estrogênio","Nenhuma adaptação ao treinamento resistido"],"B","Mulheres têm testosterona ~10-20x menor, resultando em menor hipertrofia absoluta. Porém, os ganhos percentuais de força e adaptações neurais são similares.","Treinamento de Força"],
+["O treinamento resistido para crianças e adolescentes é considerado:",["Contraindicado por risco de lesão nas cartilagens de crescimento","Seguro e benéfico quando supervisionado e com cargas adequadas, promovendo força, coordenação e saúde óssea","Indicado apenas após os 18 anos","Somente eficaz após a puberdade"],"B","O ACSM e o NSCA endossam o treinamento resistido para crianças sob supervisão adequada. Os ganhos de força em crianças pré-púberes são principalmente neurais.","Treinamento de Força"],
+["O fenômeno do 'overreaching funcional' no treinamento de força é caracterizado por:",["Lesão muscular aguda grave","Queda temporária do desempenho com recuperação e supercompensação após repouso adequado","Depressão e abandono do treino permanente","Síndrome de overtraining irreversível"],"B","Overreaching funcional é intencional: sobrecarga planejada que causa queda temporária do desempenho, seguida de supercompensação com descanso — diferente do overtraining patológico.","Treinamento de Força"],
+["O treinamento resistido para idosos (>65 anos) tem como benefícios reconhecidos:",["Apenas estético, sem impacto funcional","Aumento da massa muscular e força, melhora do equilíbrio, redução de quedas e manutenção da densidade óssea","Risco aumentado de lesão cardiovascular sem benefícios claros","Benefícios apenas se iniciado antes dos 50 anos"],"B","O TR para idosos previne sarcopenia, melhora a independência funcional, reduz risco de quedas e fraturas, e melhora a qualidade de vida e a densidade óssea.","Treinamento de Força"],
+["A contratura muscular de origem excêntrica (DOMS — Delayed Onset Muscle Soreness) atinge seu pico em:",["Imediatamente após o exercício","2-4 horas após","24-48 horas após o exercício","5-7 dias após"],"C","DOMS (dor muscular tardia de início retardado) atinge o pico em 24-48h após exercício excêntrico não habitual, resolvendo-se espontaneamente em 5-7 dias.","Treinamento de Força"],
+["O recrutamento de unidades motoras segue o Princípio do Tamanho de Henneman, que afirma:",["Unidades motoras grandes são sempre recrutadas primeiro","Unidades motoras são recrutadas da menor (tipo I) para a maior (tipo II) de acordo com a intensidade da contração","O recrutamento é aleatório sem padrão definido","Apenas fibras tipo II são recrutadas no exercício de força"],"B","O Princípio do Tamanho: baixas forças recrutam UM pequenas (tipo I, oxid.); com aumento da força, recrutam-se UM maiores (tipo IIa, IIx). Padrão hierárquico e ordinal.","Treinamento de Força"],
+["A fadiga em exercícios resistidos de alta repetição está relacionada principalmente a:",["Depleção de fosfocreatina (série de 1-3 RM)","Acúmulo de lactato, H⁺ e depleção de glicogênio muscular local","Hipoglicemia sistêmica","Desidratação severa em curto prazo"],"B","Em exercícios de 12-15+ RM: a acidose metabólica, depleção de glicogênio e acúmulo de Pi e H⁺ comprometem a função contrátil, causando fadiga muscular periférica.","Treinamento de Força"],
+["O conceito de 'volume de treinamento' no contexto do treinamento resistido é calculado por:",["Apenas o número de séries","Carga × séries × repetições (tonelagem total)","Apenas a carga máxima utilizada","Número de exercícios por sessão"],"B","Volume de treino = séries × repetições × carga. É o principal determinante do estímulo hipertrófico quando a intensidade é moderada a alta (>60% 1RM).","Treinamento de Força"],
+["A força explosiva (potência muscular) é definida como:",["Força máxima isométrica","Produto da força pela velocidade de contração (Potência = Força × Velocidade)","Resistência à fadiga muscular","Força aplicada lentamente sobre grande amplitude"],"B","Potência = F × V (ou W = F × d / t). Exercícios de potência utilizam cargas moderadas (~30-60% 1RM) executados na máxima velocidade possível.","Treinamento de Força"],
+["O treinamento em oclusão vascular (blood flow restriction — BFR) permite ganhos de força e hipertrofia com:",["Cargas altas acima de 80% 1RM","Cargas baixas (20-40% 1RM) com restrição do fluxo venoso de retorno","Qualquer carga sem diferença metabólica","Apenas em treinos de resistência aeróbia"],"B","O BFR com baixas cargas (20-40% 1RM) promove acúmulo metabólico e hipóxia local, recrutando fibras tipo II e estimulando hipertrofia comparável a cargas maiores.","Treinamento de Força"],
+["A recuperação muscular após treino intenso de força é favorecida por:",["Novo treino intenso em menos de 24h no mesmo grupo muscular","Ingestão proteica pós-treino, descanso adequado (48-72h por grupo) e sono de qualidade","Jejum prolongado após o treino","Apenas suplementação de creatina"],"B","A janela anabólica: proteína 20-40g pós-treino maximiza síntese proteica. 48-72h de repouso para o grupo muscular e sono (GH) são fundamentais.","Treinamento de Força"],
+["O método de treino em 'superset' agonista-antagonista (ex: bíceps + tríceps) apresenta como vantagem:",["Maior descanso entre as séries de cada músculo","Maior tensão em ambos os músculos sem comprometer a recuperação, reduzindo tempo total da sessão","Redução do estímulo hipertrófico","Indicado apenas para atletas avançados"],"B","Supersets agonista-antagonista permitem que um músculo descanse enquanto o outro trabalha, mantendo alta densidade de treino sem prejuízo para a recuperação local.","Treinamento de Força"],
+
+// ── BIOMECÂNICA (16 questões) ──
+["A biomecânica é o ramo da ciência que estuda:",["Apenas o sistema cardiovascular durante exercício","As forças que atuam sobre o corpo humano e os movimentos resultantes dessas forças","A química dos músculos em contrações","O sistema endócrino durante o exercício"],"B","Biomecânica aplica os princípios da mecânica à estrutura e função do sistema musculoesquelético, analisando movimentos, forças, torques e padrões de lesão.","Biomecânica"],
+["O plano sagital divide o corpo em:",["Porções superior e inferior","Porções direita e esquerda","Porções anterior e posterior","Porções medial e lateral"],"B","O plano sagital (ou mediano) divide o corpo em metades direita e esquerda. Movimentos no plano sagital: flexão/extensão.","Biomecânica"],
+["A cinemática estuda o movimento sem considerar as forças que o causam, enquanto a cinética:",["Estuda apenas a velocidade angular","Analisa as forças (internas e externas) que causam ou modificam o movimento","É sinônimo de cinemática","Avalia apenas a aceleração linear"],"B","Cinemática: descrição do movimento (posição, velocidade, aceleração). Cinética: causas do movimento (forças, torques, trabalho, potência, energia).","Biomecânica"],
+["O torque (momento de força) é calculado por:",["Força × Massa","Força × Distância perpendicular ao eixo de rotação (braço de momento)","Massa × Velocidade","Aceleração × Distância"],"B","Torque (T) = F × d (braço de momento). Unidade: N·m. É responsável pela rotação dos segmentos corporais em torno das articulações.","Biomecânica"],
+["O centro de gravidade do corpo humano na posição anatômica está localizado aproximadamente:",["No tórax","Na altura do umbigo (perto da segunda vértebra sacral)","Na cabeça","No quadril"],"B","O CG do corpo em posição anatômica está a ~55-57% da altura a partir do solo, aproximadamente na altura da segunda vértebra sacral (S2), variando com morfologia.","Biomecânica"],
+["A 2ª Lei de Newton (F = ma) aplicada à biomecânica do esporte indica que:",["Para gerar mais aceleração, deve-se reduzir a força aplicada","A aceleração é proporcional à força resultante e inversamente proporcional à massa do objeto","A força de ação e reação são iguais","O objeto em movimento permanece em movimento sem força externa"],"B","F = ma: para acelerar um corpo de maior massa, é necessária maior força. Fundamental para análise de saltos, arremessos e movimentos explosivos.","Biomecânica"],
+["O ângulo de ataque ideal na natação e na corrida, sob perspectiva biomecânica, busca:",["Maximizar a resistência ao movimento","Minimizar a resistência (drag) e maximizar a propulsão eficiente","Aumentar a turbulência da água ou do ar","Reduzir a amplitude de movimento"],"B","A minimização do arrasto (drag hidrodinâmico/aerodinâmico) é princípio fundamental na natação e ciclismo, influenciando posição corporal e técnica de nado/corrida.","Biomecânica"],
+["O músculo bíceps braquial, durante a flexão do cotovelo, atua como:",["Músculo fixador","Músculo antagonista","Músculo agonista (motor primário)","Músculo sinergista menor"],"C","Na flexão do cotovelo, o bíceps braquial é o agonista (motor primário). O tríceps braquial é o antagonista; braquial e braquiorradial são sinergistas.","Biomecânica"],
+["A análise goniométrica avalia:",["A força muscular isométrica","A amplitude de movimento articular","A velocidade angular dos segmentos","O torque muscular máximo"],"B","Goniometria mede os ângulos articulares (amplitude de movimento), sendo ferramenta clínica para avaliar função articular, progressão de reabilitação e flexibilidade.","Biomecânica"],
+["A Lei da Inércia (1ª Lei de Newton) no contexto esportivo implica que:",["Um atleta em movimento precisa de força para continuar se movendo","Um corpo em repouso ou movimento retilíneo uniforme permanece nesse estado enquanto não houver força resultante","A massa sempre aumenta com a velocidade","A resistência do ar não existe em velocidades baixas"],"B","Inércia: resistência à mudança de estado de movimento. Para iniciar, parar ou mudar direção, é necessária força resultante — fundamental em mudanças de direção nos esportes.","Biomecânica"],
+["O tendão de Aquiles transmite a força do:",["Músculo solear para a tíbia","Músculo quadríceps para a patela","Tríceps sural (gastrocnêmio + solear) para o calcâneo","Tibial posterior para o navicular"],"C","O tendão de Aquiles insere o tríceps sural (gastrocnêmio + solear) no osso calcâneo, sendo o mais espesso e resistente do corpo — essencial para a corrida e o salto.","Biomecânica"],
+["O valgismo do joelho ('joelho em X') durante a aterrissagem de um salto é um fator de risco para:",["Síndrome patelofemoral apenas","Lesão do LCA (Ligamento Cruzado Anterior), especialmente em mulheres","Distensão do tendão de Aquiles","Fratura por estresse do fêmur"],"B","O colapso em valgo do joelho (abdução + rotação interna femoral) na aterrissagem aumenta a tensão no LCA. Intervenção biomecânica reduz o risco de ruptura.","Biomecânica"],
+["O conceito de 'cadeia cinética' na biomecânica refere-se a:",["Apenas a força aplicada nos elos mais fracos","A sequência coordenada de segmentos corporais que transferem energia proximal → distal para maximizar força/velocidade","A soma de todas as articulações sem ordem","Exclusivamente aos membros superiores no arremesso"],"B","A cadeia cinética descreve como a força flui em sequência (perna → quadril → tronco → braço → mão) para maximizar a energia no ponto final (chute, arremesso, raquetada).","Biomecânica"],
+["A força de reação do solo (GRF) durante a corrida pode atingir valores de:",["0,5 × peso corporal","1,0 × peso corporal (mesma que estática)","2-3 × peso corporal no contato inicial","8-10 × peso corporal"],"C","Na corrida, a GRF vertical no apoio inicial pode ser 2-3x o peso corporal. Em sprints e aterrissagens de salto, pode superar 3x. Importante para análise de lesões por sobrecarga.","Biomecânica"],
+["A análise eletromiográfica (EMG) de superfície fornece informações sobre:",["Temperatura intramuscular","Ativação elétrica muscular (padrão de recrutamento, timing e amplitude de ativação)","Volume muscular por imagem","Força isométrica absoluta"],"B","O EMG de superfície registra a atividade elétrica dos músculos, permitindo avaliar quais músculos estão ativos, em que intensidade e em que ordem durante o movimento.","Biomecânica"],
+];
+
+const Q3 = [
+// ═══════════════════════════ SIMULADO 3 — TF · Natação · Corrida · Estatística ═══
+// ── TREINAMENTO FUNCIONAL (15 questões) ──
+["O treinamento funcional tem como princípio central:",["Desenvolver apenas força máxima isolada","Melhorar padrões de movimento que transferem para as demandas funcionais esportivas ou da vida cotidiana","Trabalhar exclusivamente em máquinas guiadas","Maximizar hipertrofia muscular segmentada"],"B","O TF busca desenvolver força, estabilidade, coordenação e potência em padrões de movimento funcionais (empurrar, puxar, rotacionar, agachar, transportar).","Treinamento Funcional"],
+["O 'core' (região do tronco/núcleo) no treinamento funcional compreende:",["Apenas os músculos abdominais superficiais","O complexo de músculos que estabilizam a coluna e o quadril: abdominais profundos, multífido, diafragma e assoalho pélvico","Apenas os eretores da coluna","Os músculos do quadríceps e isquiossurais"],"B","O core é o cilindro de estabilização: transverso do abdômen, multífido, diafragma, assoalho pélvico e oblíquos. Estabiliza a coluna antes dos movimentos dos membros.","Treinamento Funcional"],
+["O foam rolling (liberação miofascial) é utilizado antes do treino principalmente para:",["Aumentar a carga máxima no exercício","Reduzir pontos de tensão na fáscia, melhorar a mobilidade e preparar o tecido para o aquecimento dinâmico","Substituir completamente o aquecimento cardiovascular","Aumentar a força isométrica máxima"],"B","O foam rolling comprime e massageia a fáscia, reduzindo restrições miofasciais. Deve preceder o alongamento dinâmico e o aquecimento específico.","Treinamento Funcional"],
+["O aquecimento dinâmico é preferível ao estático pré-exercício porque:",["Aumenta a flexibilidade passiva de forma mais eficaz","Eleva a temperatura muscular, ativa o sistema nervoso e não reduz a força explosiva como o alongamento estático prolongado","Exige menos tempo e esforço","É indicado apenas para idosos"],"B","O alongamento estático prolongado (>30-60s) pré-exercício pode reduzir força e potência explosiva. O aquecimento dinâmico ativa a musculatura sem esses efeitos negativos.","Treinamento Funcional"],
+["Na análise das demandas do esporte, o treinamento funcional avalia:",["Apenas a força máxima no supino e agachamento","Padrões de movimento específicos, planos de movimento, bases de suporte, velocidades e demandas energéticas do esporte","Somente a composição corporal do atleta","O VO₂máx e frequência cardíaca máxima isoladamente"],"B","A análise esportiva examina: planos de movimento envolvidos, tipo de contração, base de suporte, velocidade, carga e sistema energético predominante.","Treinamento Funcional"],
+["O treinamento pliométrico é caracterizado por:",["Contrações isométricas sustentadas","O ciclo de alongamento-encurtamento (CAE): fase excêntrica rápida → fase isométrica mínima → fase concêntrica explosiva","Exercícios de baixa velocidade e alta carga","Contrações concêntricas isoladas sem fase excêntrica"],"B","O CAE armazena energia elástica no tendão e musculatura durante a fase excêntrica, liberando-a na fase concêntrica, aumentando a potência de saída.","Treinamento Funcional"],
+["O levantamento olímpico (clean & jerk, snatch) é incluído no treinamento funcional de atletas pois desenvolve:",["Apenas força máxima estática","Potência explosiva global, coordenação neuromuscular e ativação da cadeia cinética posterior","Força isolada dos membros superiores","Apenas resistência cardiorrespiratória"],"B","Os levantamentos olímpicos desenvolvem potência, velocidade de contração e coordenação de toda a cadeia cinética — transferência direta para esportes explosivos.","Treinamento Funcional"],
+["O agachamento (squat) é considerado um exercício funcional primário porque:",["É o único que ativa o glúteo máximo","Replica o padrão fundamental de sentar/levantar, ativa toda a cadeia posterior e anterior de forma integrada","Trabalha isoladamente o quadríceps","É seguro apenas para atletas avançados"],"B","O agachamento replica um dos padrões de movimento mais fundamentais (sentar/levantar), ativando quadríceps, glúteos, isquiossurais, core e coluna de forma integrada.","Treinamento Funcional"],
+["A avaliação da força funcional inclui testes de:",["Apenas 1RM no supino","Equilíbrio unipodal, padrões de agachamento, qualidade de movimento (FMS) e testes de força em padrões multiarticulares","Apenas espirometria","Dobras cutâneas exclusivamente"],"B","A avaliação funcional usa: FMS (Functional Movement Screen), Y-Balance Test, agachamento unipodal, overhead squat, e testes de força funcional em padrões de movimento.","Treinamento Funcional"],
+["O treinamento para a região superior do corpo no modelo funcional prioriza:",["Isolamento do bíceps e tríceps","Padrões de empurrar (push) e puxar (pull) horizontais e verticais com estabilização do core","Apenas desenvolvimento do peitoral","Exercícios em máquinas guiadas unicamente"],"B","Os padrões primários da parte superior são: empurrar horizontal (supino), empurrar vertical (desenvolvimento), puxar horizontal (remada), puxar vertical (pull-up).","Treinamento Funcional"],
+["O treinamento de equilíbrio unipodal e propriocepção é fundamental para:",["Apenas atletas de ginástica","Prevenção de lesões (tornozelo, joelho, LCA), melhora do controle neuromuscular e desempenho esportivo","Apenas idosos com risco de queda","Exclusivamente reabilitação pós-cirúrgica"],"B","O treinamento proprioceptivo melhora a estabilidade articular dinâmica, reduz recidiva de entorse de tornozelo e lesões de LCA, sendo parte essencial da prevenção.","Treinamento Funcional"],
+["A montagem de um programa funcional segue a sequência lógica:",["Forca máxima → Potência → Aquecimento → Flexibilidade","Aquecimento geral → Foam rolling → Ativação/mobilidade → Exercícios principais (potência antes de força) → Metabólico → Volta à calma","Cardio → Força → Alongamento estático apenas","Qualquer ordem sem impacto no resultado"],"B","Sequência ideal: ativação geral → liberação miofascial → mobilidade/ativação → potência (explosivos primeiro, quando sistema está fresco) → força → condicionamento metabólico.","Treinamento Funcional"],
+["Os exercícios de carregar (loaded carries) como o Farmers Walk desenvolvem:",["Apenas resistência cardiovascular","Força de preensão, estabilização do core, força da cadeia lateral e condicionamento sistêmico","Apenas a musculatura do antebraço","Exclusivamente os músculos da panturrilha"],"B","Farmers Walk e variações desenvolvem grip, ombros, core, quadril e aspectos condicionantes. São exercícios funcionais de alta transferência para o cotidiano e esporte.","Treinamento Funcional"],
+["No contexto do treinamento funcional, o conceito de 'mobilidade' difere de 'flexibilidade' pois:",["São termos completamente sinônimos","Mobilidade é a amplitude de movimento que o atleta pode controlar ativamente, enquanto flexibilidade é a amplitude passiva dos tecidos","Flexibilidade é mais importante para atletas","Mobilidade só se aplica às articulações do quadril"],"B","Mobilidade = controle neuromuscular ativo em toda a ADM. Flexibilidade = extensibilidade passiva do tecido. Um músculo pode ser flexível mas com mobilidade limitada por falta de controle.","Treinamento Funcional"],
+["O treinamento de carregar objetos em overhead (acima da cabeça) exige principalmente:",["Força de preensão e bíceps","Estabilidade escapular, força do core e mobilidade de ombro e torácica","Apenas força do tríceps","Flexibilidade dos isquiossurais"],"B","Exercícios overhead demands: estabilidade escapular (serrátil, trapézio), mobilidade de ombro e coluna torácica, e ativação profunda do core para proteger a lombar.","Treinamento Funcional"],
+
+// ── NATAÇÃO (15 questões) ──
+["A propulsão no nado crawl é gerada principalmente por:",["Movimentos das pernas (pernada)","Movimentos dos braços (bracejada) via força de sustentação e arrasto","Apenas pelo posicionamento do corpo","Pela cabeça durante a respiração"],"B","A bracejada gera ~80-90% da propulsão no crawl. A pernada contribui com estabilização do corpo, elevação dos quadris e uma pequena parcela propulsiva.","Natação"],
+["O princípio de Bernoulli aplicado à natação explica a propulsão por:",["Força de arrasto direta empurrando a água para trás","Diferença de pressão nas faces da mão: menor pressão na face posterior gera força de sustentação (lift) na direção do movimento","Viscosidade da água","Temperatura da água e resistência viscosa"],"B","Pelas equações de Bernoulli, a mão inclinada move água mais rápido em uma face (menor pressão) e mais lento na outra (maior pressão), gerando força de sustentação propulsiva.","Natação"],
+["A posição hidrodinámica ideal no crawl exige:",["Cabeça elevada acima da água continuamente","Corpo alinhado horizontalmente (decúbito ventral), com mínima resistência frontal","Quadris submersos e pés fora d'água","Cotovelos baixos e mão plana durante a entrada"],"B","A posição plana (streamline) minimiza o arrasto. O corpo deve rodar no eixo longitudinal (~45°) com a bracejada, não elevar a cabeça — rotar apenas para respirar.","Natação"],
+["No nado borboleta, a ondulação corporal (dolphin kick) é gerada a partir de:",["Apenas os tornozelos","Quadril, com propagação ondulatória para joelhos e tornozelos","Ombros com transferência para o quadril","Apenas a pernada de golfinho dos pés"],"B","A ondulação do borboleta inicia nos quadris, propaga-se para os joelhos e termina nos pés. O timing deve ser duplo por ciclo de braços.","Natação"],
+["A saída (largada) mais eficiente em provas de crawl utiliza o princípio biomecânico de:",["Saltar o mais alto possível para ganhar altura","Inclinar o corpo em ângulo agudo (~35-40°) para entrar na água com mínimo arrasto e máxima velocidade horizontal","Entrar com os pés primeiro","Mergulhar perpendicular à água"],"B","O grab start ou track start visa projeção horizontal e entrada eficiente: ângulo de 35-40° otimiza a profundidade de entrada e a glide subaquática.","Natação"],
+["O metabolismo energético predominante em provas de 50m de natação (sprint) é:",["Oxidativo aeróbio","Sistema ATP-PCr e glicólise anaeróbia lática","Exclusivamente beta-oxidação","Ciclo de Krebs predominante"],"B","Provas de 50m (~20-25s): predominância do sistema ATP-PCr (0-10s) e glicólise anaeróbia (10-25s). A contribuição aeróbia é pequena (<30%).","Natação"],
+["A virada olímpica de tumble turn no crawl permite:",["Descanso entre comprimentos","Redução do tempo perdido na parede e manutenção da velocidade de nado via impulso dinâmico da parede","Respiração mais eficiente","Maior tempo subaquático"],"B","O tumble turn permite tocar, girar e empurrar a parede em movimento contínuo, reduzindo em ~1-2s o tempo por virada em relação à virada aberta.","Natação"],
+["O polimento (tapering) na periodização da natação consiste em:",["Aumento progressivo do volume nas últimas semanas antes da competição","Redução planejada do volume (mantendo intensidade) nas últimas 1-3 semanas para permitir recuperação e peak de desempenho","Redução de intensidade e volume simultaneamente","Período de destreinamento completo pré-competição"],"B","O tapering reduz volume (60-90%), mantendo intensidade. Ocorre melhora do VO₂máx, redução de lactato, melhora do sono e capacidade contrátil — peak de desempenho.","Natação"],
+["A frequência de braçada e o comprimento de braçada na natação competitiva se relacionam da seguinte forma:",["Maior frequência sempre resulta em melhor desempenho","Velocidade = Frequência × Comprimento de braçada; o treinamento busca otimizar os dois conforme a prova","Comprimento de braçada não importa","São independentes e não se relacionam"],"B","V = FB × CB. Sprinters tendem a maior FB; fundistas otimizam CB. O treinamento de velocidade e técnica busca o equilíbrio ideal para cada nadador e distância.","Natação"],
+["O supertreinamento (overtraining) em nadadores manifesta-se por:",["Melhora contínua de desempenho","Queda de desempenho, distúrbios do humor, fadiga persistente, aumento de lesões e comprometimento imune","Apenas fadiga muscular localizada","Bradicardia exclusiva sem outros sintomas"],"B","Síndrome de overtraining: plateau ou queda de desempenho + sintomas psicológicos (irritabilidade, insônia), imunossupressão, alterações hormonais (↓testosterona, ↑cortisol).","Natação"],
+["A monitoração do treinamento na natação pode incluir:",["Apenas cronometragem das provas","Lactatemia, FC, RPE, análise de tempos parciais, volume semanal e testes de desempenho padronizados","Apenas observação visual do técnico","Somente medidas antropométricas"],"B","Monitoração integrada: lactato, FC em esforços submáximos, RPE, análise de splits, TRIMP (Training Impulse), HRV — permitem ajuste fino da carga de treinamento.","Natação"],
+["O treinamento de resistência na natação (treino em distância) visa principalmente:",["Aumentar a velocidade máxima de sprint","Desenvolver a base aeróbia, eficiência técnica e econômica de nado em velocidades submáximas","Apenas a força muscular dos braços","Exclusivamente a técnica de virada"],"B","O treino de base aeróbia (longa distância, baixa intensidade) desenvolve densidade mitocondrial, eficiência de nado, economia de movimento e recuperação entre esforços.","Natação"],
+["A redução da resistência (drag) na natação pode ser obtida pela:",["Elevação da cabeça durante todo o nado","Posição corporal streamline, redução da área frontal, superfícies lisas e roupas de natação tecno-hidrorredutor","Maior frequência de pernada sempre","Respiração mais frequente"],"B","Estratégias anti-drag: posição horizontal, cabeça na linha do corpo, rotação adequada, traje de competição hidrodinâmico e minimização da turbulência.","Natação"],
+["O nado de costas tem como principal característica técnica:",["Cabeça elevada e quadris submersos","Posição supina plana, entrada da mão na linha do ombro, recuperação do braço com cotovelo estendido","Respiração contínua sem padrão definido","Pernada de golfinho apenas"],"B","Costas: posição supina com cabeça neutra, corpo plano, entrada da mão na extensão do ombro (não cruzando a linha média), pernada alternada com joelhos próximos à superfície.","Natação"],
+["Na saída de costas, o nadador parte de qual posição?",["Em pé na borda da piscina","Submerso de frente para a parede, segurando a barra de partida","Sentado na borda da piscina","De costas à beira da piscina sem contato"],"B","Na saída de costas: o nadador fica na água, de frente para a parede, segurando a barra de partida com os pés apoiados na parede, executando o salto em arco para trás.","Natação"],
+
+// ── CORRIDA (12 questões) ──
+["A mecânica da corrida eficiente inclui o padrão de contato com o solo pelo:",["Calcanhar sempre (heel strike) independente da velocidade","Meio do pé (midfoot) ou antepé em velocidades mais altas, com menor impacto e maior aproveitamento elástico do tendão","Dedos apenas em todas as velocidades","Planta inteira com pausa a cada passo"],"B","O contato pelo meio/antepé permite maior aproveitamento elástico do tendão de Aquiles, menor impacto vertical e cadência mais eficiente em velocidades maiores.","Corrida"],
+["A cadência ideal de corrida para a maioria dos corredores de performance está por volta de:",["100-120 passos/min","140-160 passos/min","170-185 passos/min","200-220 passos/min"],"C","Estudos mostram que a cadência ótima para a maioria dos corredores está entre 170-185 passos/min (85-92 por pé). Cadências menores associam-se a maior impacto e risco de lesão.","Corrida"],
+["O treinamento de corrida deve seguir a regra de não aumentar o volume semanal mais que:",["1% por semana","5-10% por semana","25% por semana","50% por semana"],"B","A regra dos 10% (máximo 10% de aumento semanal no volume) previne lesões por sobrecarga. Progressão excessiva é a principal causa de lesões em corredores amadores.","Corrida"],
+["A periodização na corrida inclui fases de:",["Apenas volume alto sem variação de intensidade","Base aeróbia → desenvolv. de velocidade → pré-competição (afina-mento) → competição → regeneração","Apenas sprints sem treino de fundo","Volume constante sem periodização"],"B","Periodização da corrida: base (volume, baixa intensidade) → construção (limiar, intervalados) → pico (velocidade, corridas) → tapering → competição → recuperação.","Corrida"],
+["Os treinos intervalados de alta intensidade (ex: Fartlek, intervalados no pista) melhoram principalmente:",["Apenas a força dos membros inferiores","VO₂máx, velocidade no limiar anaeróbio e tolerância ao lactato","Apenas a técnica de corrida","Exclusivamente a composição corporal"],"B","Os treinos intervalados elevam o estímulo cardiopulmonar máximo (VO₂máx), melhoram o limiar de lactato e a economia de corrida.","Corrida"],
+["A avaliação de corredores deve incluir:",["Apenas uma corrida de 12 minutos (Cooper)","Histórico de lesões, análise da pisada (biomecânica), testes de força e equilíbrio, e testes de capacidade aeróbia","Apenas pesagem e IMC","Somente frequência cardíaca de repouso"],"B","A avaliação completa do corredor inclui: anamnese, análise biomecânica da corrida, força de MMII, flexibilidade, testes funcionais e capacidade aeróbia (VO₂máx ou submáximo).","Corrida"],
+["O treinamento complementar (cross-training) para corredores inclui:",["Apenas mais corrida em diferentes superfícies","Ciclismo, natação, musculação e outras modalidades para condicionamento sem sobrecarga repetitiva","Apenas alongamentos pré-corrida","Treino de corrida na esteira como único complemento"],"B","Cross-training mantém condicionamento aeróbio e força sem o impacto repetitivo da corrida, sendo especialmente útil em períodos de lesão ou recuperação.","Corrida"],
+["A técnica de corrida eficiente envolve:",["Postura inclinada para trás com passada ampla à frente do CG","Postura neutra levemente inclinada à frente, apoio sob o CG, braços em ~90° e baixa oscilação vertical","Braços cruzando a linha média do corpo e cabeça inclinada","Passada o mais longa possível para economizar energia"],"B","Boa técnica: postura ereta/levemente à frente, pé apoiando sob o CG (não à frente), cotovelos ~90°, mãos relaxadas, oscilação vertical mínima e olhar à frente.","Corrida"],
+["A lesão mais comum em corredores de longa distância é:",["Fratura por estresse do fêmur","Síndrome da banda iliotibial, tendinopatia patelar e fascite plantar (lesões por sobrecarga)","Luxação do ombro","Ruptura do LCA"],"B","Lesões mais frequentes em corredores: síndrome da banda iliotibial (joelho do corredor), fascite plantar, periostite tibial, tendinopatia patelar e do Aquiles — todas por sobrecarga repetitiva.","Corrida"],
+["O 'muro' (hitting the wall) em maratonistas por volta do km 30-35 é causado principalmente por:",["Lesão muscular aguda","Depleção de glicogênio muscular e hepático, com drástica redução de substrato glicídico disponível","Desidratação total sem relação com glicogênio","Hipertermia exclusiva"],"B","O muro ocorre pela depleção de glicogênio (~90 min de exercício intenso). O corpo passa a depender de lipídios (mais lentos) e proteínas, causando queda abrupta de velocidade.","Corrida"],
+["A aprendizagem da técnica de corrida é melhor realizada por:",["Correção de todos os erros simultaneamente desde a primeira sessão","Abordagem progressiva: consciência corporal, drills específicos e feedback contínuo, modificando um elemento de cada vez","Apenas assistindo vídeos sem prática","Exclusivamente correndo sem instrução técnica"],"B","A correção técnica eficaz é gradual: identificar o erro prioritário, corrigir um elemento por vez com drills e feedback, permitindo automatização antes de nova correção.","Corrida"],
+["O polimento (tapering) antes de uma maratona importante deve durar aproximadamente:",["1-2 dias","1 semana","2-3 semanas (com redução de volume em 40-60%)","2 meses"],"C","Para maratona: tapering de 2-3 semanas, reduzindo volume 40-60% mas mantendo intensidade (treinos curtos em ritmo de prova). Permite recuperação e supercompensação.","Corrida"],
+
+// ── ESTATÍSTICA DESCRITIVA (28 questões) ──
+["A diferença entre população e amostra na estatística é que:",["São sinônimos e podem ser usados indistintamente","População é o conjunto total de elementos de interesse; amostra é um subconjunto representativo da população","A amostra é sempre maior que a população","População refere-se apenas a humanos"],"B","População: conjunto completo de elementos de interesse. Amostra: subconjunto representativo coletado para inferência sobre a população. Parâmetros × estatísticas.","Estatística"],
+["Uma variável é considerada contínua quando:",["Assume apenas valores inteiros","Pode assumir qualquer valor em um intervalo numérico real (VC máx, altura, massa corporal)","Possui apenas 2 categorias","Representa categorias nominais"],"B","Variáveis contínuas: assumem qualquer valor real em um intervalo (ex: 1,732 m de altura). Discretas: valores inteiros contáveis (nº de filhos, nº de gols).","Estatística"],
+["A amplitude total de um conjunto de dados é calculada por:",["Média − mediana","Valor máximo − valor mínimo","Soma de todos os valores / n","Desvio padrão ao quadrado"],"B","Amplitude total (AT) = X_max − X_min. Medida simples de dispersão, sensível a outliers.","Estatística"],
+["A frequência relativa de uma classe em uma distribuição de frequência é calculada por:",["Frequência absoluta / frequência total × 100","Frequência absoluta × 2","Valor máximo / total de classes","Soma das frequências da classe anterior"],"A","Frequência relativa (%) = (fi / n) × 100. Permite comparar distribuições com diferentes tamanhos amostrais.","Estatística"],
+["O histograma é um gráfico adequado para representar:",["Frequências de variáveis nominais (categorias)","Distribuição de frequência de variáveis quantitativas contínuas por meio de barras justapostas","Proporções em categorias sem ordem","Apenas séries temporais"],"B","O histograma representa a distribuição de variáveis quantitativas contínuas agrupadas em classes, com barras adjacentes (sem espaço), cujas áreas são proporcionais às frequências.","Estatística"],
+["A média aritmética simples de {4, 7, 7, 9, 13} é:",["7","8","9","10"],"B","Soma = 4+7+7+9+13 = 40; n = 5; Média = 40/5 = <strong>8</strong>.","Estatística"],
+["A mediana de {3, 5, 7, 9, 11, 13} é:",["7","8","9","10"],"B","n=6 (par); mediana = (7+9)/2 = 16/2 = <strong>8</strong>. Elementos centrais são o 3° (7) e 4° (9).","Estatística"],
+["A moda de um conjunto de dados é:",["O valor central quando ordenado","O valor que ocorre com maior frequência","A média dos valores extremos","O valor mais distante da média"],"B","Moda = valor ou valores com maior frequência. Pode ser: unimodal, bimodal ou amodal (sem moda clara).","Estatística"],
+["Em uma distribuição simétrica (normal), a relação entre média, mediana e moda é:",["Média > Mediana > Moda","Moda > Mediana > Média","Média < Mediana < Moda","Média = Mediana = Moda"],"D","Na distribuição normal (gaussiana), que é simétrica e unimodal, as três medidas de tendência central coincidem no centro da distribuição.","Estatística"],
+["O desvio padrão (DP) é uma medida de:",["Tendência central","Dispersão (variabilidade) dos dados em torno da média","Correlação entre variáveis","Frequência relativa"],"B","O DP mede o quanto os valores se afastam da média. Pequeno DP = dados concentrados; grande DP = dados dispersos. DP = √(variância).","Estatística"],
+["A variância é definida como:",["A raiz quadrada do desvio padrão","A média dos quadrados dos desvios em relação à média","O quadrado da amplitude","A diferença entre mediana e moda"],"B","Variância (s²) = Σ(xi − x̄)² / (n−1). O desvio padrão é a raiz quadrada da variância, na mesma unidade dos dados.","Estatística"],
+["O coeficiente de variação (CV) é utilizado para:",["Calcular a frequência absoluta","Comparar a variabilidade relativa de dois grupos com diferentes médias ou unidades","Determinar a mediana em distribuições simétricas","Calcular a amplitude interquartil"],"B","CV = (DP / Média) × 100%. Permite comparar variabilidade relativa: ex. DP de VO₂máx em atletas vs. sedentários com médias diferentes.","Estatística"],
+["Uma distribuição assimétrica positiva (cauda à direita) tem:",["Média = Mediana = Moda","Média < Mediana < Moda","Moda < Mediana < Média","Mediana > Média > Moda"],"C","Assimetria positiva (Pearson): cauda longa à direita. Ordem: Moda < Mediana < Média (valores extremos altos puxam a média).","Estatística"],
+["O polígono de frequência é obtido pela união dos:",["Cantos superiores das barras do histograma","Pontos médios do topo de cada barra do histograma (pontos médios das classes)","Limites inferiores de cada classe","Frequências acumuladas de cada classe"],"B","O polígono de frequência une os pontos médios do topo das barras do histograma, iniciando e terminando em zero, formando uma curva poligonal fechada.","Estatística"],
+["A ogiva percentual (ogiva) representa:",["A distribuição de frequência absoluta por classe","A frequência relativa ou absoluta acumulada em função dos limites superiores das classes","Apenas a curva normal padrão","A frequência modal de cada classe"],"B","A ogiva é o gráfico das frequências acumuladas (absolutas ou relativas). Permite estimar percentis, mediana e quartis graficamente.","Estatística"],
+["O ponto médio de uma classe em distribuição de frequência é calculado por:",["Limite superior − limite inferior","(Limite inferior + Limite superior) / 2","Frequência absoluta / amplitude","Amplitude total / número de classes"],"B","Ponto médio (xi) = (Li + Ls) / 2. Usado para calcular a média de dados agrupados: x̄ = Σ(fi × xi) / n.","Estatística"],
+["Para calcular a média de dados agrupados em uma tabela de frequência, utiliza-se:",["Apenas os limites superiores das classes","A soma dos produtos (frequência × ponto médio da classe) dividida pelo total de observações","A soma das frequências absolutas","O ponto médio da classe modal"],"B","Média agrupada: x̄ = Σ(fi × xi) / n, onde fi é a frequência absoluta e xi é o ponto médio de cada classe.","Estatística"],
+["A regra prática de Sturges para determinar o número de classes (k) em uma distribuição de frequência usa a fórmula:",["k = n/2","k = 1 + 3,322 × log(n)","k = √n","k = n − 1"],"B","Sturges: k = 1 + 3,322 × log₁₀(n). Para n=100: k ≈ 7-8 classes. Outras regras: raiz quadrada (√n) e Rice (2 × n^(1/3)).","Estatística"],
+["Quartis Q1, Q2 e Q3 dividem os dados ordenados em:",["Duas metades iguais","Quatro partes de 25% cada","Dez partes de 10% cada","Cinco partes de 20% cada"],"B","Quartis: Q1 (25%), Q2 = mediana (50%), Q3 (75%). A amplitude interquartil (AIQ = Q3 − Q1) é uma medida de dispersão robusta.","Estatística"],
+["A amplitude interquartil (AIQ ou IQR) é importante porque:",["Inclui todos os dados na sua medida","É uma medida de dispersão robusta, menos sensível a outliers que o desvio padrão","É calculada apenas para dados nominais","É idêntica ao desvio padrão para distribuições simétricas"],"B","AIQ = Q3 − Q1. Representa os 50% centrais dos dados; não é afetada por valores extremos, sendo preferível ao DP quando há outliers.","Estatística"],
+["No boxplot, os 'bigodes' (whiskers) representam:",["Média e desvio padrão","Os valores mínimo e máximo dentro dos limites de 1,5 × AIQ a partir de Q1 e Q3 (outliers além desse limite são marcados separadamente)","Q1 e Q3 apenas","A mediana e a moda"],"B","O boxplot: caixa de Q1 a Q3 (com mediana); bigodes até 1,5×AIQ de Q1 e Q3. Pontos além dos bigodes são outliers potenciais.","Estatística"],
+["A fórmula de Czuber é utilizada para calcular:",["A média aritmética de dados agrupados","A moda de uma distribuição de frequência agrupada de forma mais precisa","A variância amostral","O coeficiente de correlação de Pearson"],"B","A fórmula de Czuber (ou Pearson) para moda agrupada: Mo = Li + [(d1)/(d1+d2)] × h, onde d1 e d2 são diferenças entre a frequência modal e as classes adjacentes, h a amplitude.","Estatística"],
+["Uma série temporal (cronológica) na estatística representa:",["Dados distribuídos por regiões geográficas","A evolução de uma variável ao longo do tempo em intervalos regulares","Frequências de categorias nominais","Distribuição de frequência de variáveis contínuas"],"B","Série cronológica: valores de uma variável em momentos sucessivos (anos, meses, semanas). Ex: VO₂máx mensal de atleta ao longo da temporada.","Estatística"],
+["Na estatística descritiva, a curtose mede:",["A assimetria da distribuição","O grau de achatamento da distribuição em relação à curva normal (leptocúrtica, mesocúrtica, platicúrtica)","A amplitude total dos dados","O número de outliers"],"B","Curtose: Leptocúrtica (>0, pico alto, caudas pesadas), Mesocúrtica (=0, curva normal), Platicúrtica (<0, achatada, caudas leves).","Estatística"],
+["Na estatística indutiva (inferencial), o objetivo é:",["Apenas descrever os dados da amostra com tabelas e gráficos","Fazer inferências e generalizações sobre a população a partir de dados amostrais","Calcular apenas médias e medianas","Organizar dados em distribuições de frequência"],"B","Estatística indutiva/inferencial: usar dados amostrais para estimar parâmetros populacionais, testar hipóteses e tomar decisões com certo nível de confiança.","Estatística"],
+["O percentil P90 indica que:",["90% dos valores estão acima desse ponto","10% dos valores são iguais a esse valor","90% dos valores da distribuição estão abaixo ou iguais a esse ponto","É a mesma coisa que o nonacentésimo quartil"],"C","Percentil P_k: valor abaixo do qual estão k% das observações. P90 = 90% dos dados estão abaixo. P25 = Q1; P50 = Q2 (mediana); P75 = Q3.","Estatística"],
+["Em tabelas de distribuição de frequência, o limite real (verdadeiro) de classe é necessário para:",["Calcular a moda","Eliminar descontinuidades entre classes de variáveis contínuas, evitando lacunas na distribuição","Calcular a frequência relativa","Determinar o número de classes"],"B","Limites reais: LRI = LI − 0,5 unidade; LRS = LS + 0,5 unidade. Usados para variáveis contínuas onde não existe interrupção real entre os valores.","Estatística"],
+];
+
+// ─── ENGINE ──────────────────────────────────────────────────────────────────
+const ALL = {1: Q1, 2: Q2, 3: Q3};
+const state = {
+  1: {answers:{}, correct:{}},
+  2: {answers:{}, correct:{}},
+  3: {answers:{}, correct:{}}
+};
+let currentTab = 1;
+
+const TAB_INFO = {
+  1: {
+    title: "Anatomia & Fisiologia",
+    subtitle: "Simulado 1 · 70 questões",
+    chips: ["Anatomia Humana","Fisiologia do Exercício"],
+    icon: "🧬"
+  },
+  2: {
+    title: "ACSM · Primeiros Socorros · TF · Biomecânica",
+    subtitle: "Simulado 2 · 70 questões",
+    chips: ["Dir. ACSM","Primeiros Socorros","Trein. Força","Biomecânica"],
+    icon: "💪"
+  },
+  3: {
+    title: "Trein. Funcional · Natação · Corrida · Estatística",
+    subtitle: "Simulado 3 · 70 questões",
+    chips: ["Trein. Funcional","Natação","Corrida","Estatística"],
+    icon: "📊"
+  }
+};
+
+function buildPanel(tab) {
+  const panel = document.getElementById('p'+tab);
+  const qs = ALL[tab];
+  const info = TAB_INFO[tab];
+  let html = `
+    <div class="ph">
+      <div class="ph-tag">CP-T/2026 · Ed. Física</div>
+      <div class="ph-title">${info.icon} ${info.title}</div>
+      <div class="ph-sub">${info.subtitle} — Gabaritado</div>
+      <div class="ph-chips">${info.chips.map(c=>`<span class="chip">${c}</span>`).join('')}</div>
+    </div>
+    <div class="score-banner" id="sb${tab}"></div>
+    <div class="filter-bar" id="fb${tab}">
+      <div class="filter-chip active" onclick="filterQs(${tab},'all',this)">Todas</div>
+      ${[...new Set(qs.map(q=>q[4]))].map(t=>`<div class="filter-chip" onclick="filterQs(${tab},'${t}',this)">${t}</div>`).join('')}
+    </div>
+  `;
+  let lastTopic = '';
+  qs.forEach((q, i) => {
+    const qid = `t${tab}q${i}`;
+    if (q[4] !== lastTopic) {
+      html += `<div class="sec-div" data-topic="${q[4]}"><div class="sec-div-line"></div><div class="sec-div-lbl">${q[4]}</div><div class="sec-div-line"></div></div>`;
+      lastTopic = q[4];
+    }
+    const opts = ['A','B','C','D'];
+    html += `
+      <div class="qcard" id="${qid}" data-topic="${q[4]}">
+        <div class="qhead">
+          <div class="qtopic">${q[4]}</div>
+          <div class="qtext"><span class="qnum">Q${String(i+1).padStart(2,'0')}</span>${q[0]}</div>
+        </div>
+        <div class="qopts">
+          ${q[1].map((opt,j)=>`<div class="qopt" id="${qid}${opts[j]}" onclick="answer('${qid}','${opts[j]}','${q[2]}',${tab})"><span class="opt-lbl">${opts[j]}</span><span class="opt-txt">${opt}</span></div>`).join('')}
+        </div>
+        <div class="qfeed" id="${qid}f"></div>
+      </div>`;
+  });
+  html += `
+    <div class="act-row">
+      <button class="btn-gold" onclick="showScore(${tab})">📊 Ver Resultado</button>
+      <button class="btn-ghost" onclick="resetTab(${tab})">🔄 Refazer</button>
+    </div>`;
+  panel.innerHTML = html;
+}
+
+function answer(qid, chosen, correct, tab) {
+  const s = state[tab];
+  if (s.answers[qid]) return;
+  s.answers[qid] = chosen;
+  s.correct[qid] = (chosen === correct);
+  const card = document.getElementById(qid);
+  ['A','B','C','D'].forEach(l => {
+    const el = document.getElementById(qid+l);
+    if (!el) return;
+    el.style.pointerEvents = 'none';
+    if (l === correct) el.classList.add('hit');
+    else if (l === chosen && chosen !== correct) el.classList.add('miss');
+  });
+  card.classList.add(s.correct[qid] ? 'ok' : 'ng');
+  const qi = parseInt(qid.replace(/t\dq/,''));
+  const q = ALL[tab][qi];
+  const fb = document.getElementById(qid+'f');
+  const isOk = s.correct[qid];
+  fb.innerHTML = `${isOk?'✅':'❌'} <strong>${correct}</strong> — ${q[3]}`;
+  fb.classList.add('show', isOk ? 'fb-ok' : 'fb-ng');
+  updateHeader();
+}
+
+function showScore(tab) {
+  const s = state[tab];
+  const total = ALL[tab].length;
+  const answered = Object.keys(s.answers).length;
+  const hits = Object.values(s.correct).filter(Boolean).length;
+  const pct = answered ? Math.round(hits/answered*100) : 0;
+  const banner = document.getElementById('sb'+tab);
+  banner.innerHTML = `🎯 Resultado: <strong>${hits}/${answered}</strong> acertos (${pct}%) · ${total-answered} sem resposta`;
+  banner.classList.add('show');
+  banner.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function resetTab(tab) {
+  state[tab] = {answers:{}, correct:{}};
+  buildPanel(tab);
+  updateHeader();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('p'+tab).classList.add('active');
+  el.classList.add('active');
+  currentTab = tab;
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function filterQs(tab, topic, el) {
+  document.querySelectorAll(`#fb${tab} .filter-chip`).forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const panel = document.getElementById('p'+tab);
+  panel.querySelectorAll('.qcard, .sec-div').forEach(el2 => {
+    if (topic === 'all') { el2.style.display=''; return; }
+    el2.style.display = (el2.dataset.topic === topic) ? '' : 'none';
+  });
+}
+
+function updateHeader() {
+  let totalAns = 0, totalHits = 0, totalQ = 0;
+  [1,2,3].forEach(t => {
+    totalAns += Object.keys(state[t].answers).length;
+    totalHits += Object.values(state[t].correct).filter(Boolean).length;
+    totalQ += ALL[t].length;
+  });
+  document.getElementById('hdr-score').textContent = `${totalHits}/${totalAns}`;
+  const pct = totalQ ? Math.round(totalAns/totalQ*100) : 0;
+  document.getElementById('hdr-prog').style.width = pct+'%';
+  document.getElementById('hdr-prog-txt').textContent = `${totalAns} respondidas`;
+  document.getElementById('hdr-pct').textContent = pct+'%';
+  // Update badges
+  [1,2,3].forEach(t => {
+    const ans = Object.keys(state[t].answers).length;
+    const rem = ALL[t].length - ans;
+    document.getElementById('bd'+t).textContent = rem > 0 ? rem : '✓';
+  });
+}
+
+// Scroll to top button
+window.addEventListener('scroll', () => {
+  const btn = document.getElementById('top-btn');
+  btn.classList.toggle('show', window.scrollY > 300);
+});
+
+// Init
+[1,2,3].forEach(buildPanel);
+updateHeader();
+</script>
+</body>
+</html>
